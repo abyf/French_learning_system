@@ -34,6 +34,27 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// --------------------------------------------------------
+// Journal des testeurs (Google Sheet via Apps Script Web App).
+// Envoi en arrière-plan, non bloquant : si le testeur est hors
+// ligne ou que l'envoi échoue, l'inscription se poursuit normalement.
+// Le script côté serveur ignore déjà les emails en double.
+// --------------------------------------------------------
+const TESTER_LOG_URL = 'https://script.google.com/macros/s/AKfycbx4nzsAkIqEaFcXhTkwEROF8IUM-5pgMv1dlxEKNK8W6U_W_eMuYu61QFRQxhR7l489Hw/exec';
+
+function logTesterInfo(user) {
+  try {
+    const body = new URLSearchParams({
+      prenom: user.firstname,
+      email: user.email,
+      alias: user.alias
+    });
+    fetch(TESTER_LOG_URL, { method: 'POST', mode: 'no-cors', body }).catch(() => {});
+  } catch (e) {
+    // Échec silencieux — ne doit jamais bloquer l'inscription.
+  }
+}
+
 async function registerUser({ firstname, email, alias, password }) {
   const users = loadUsers();
   const normAlias = normalizeAlias(alias);
@@ -50,6 +71,7 @@ async function registerUser({ firstname, email, alias, password }) {
   const user = { firstname: firstname.trim(), email: normEmail, alias: normAlias, passwordHash };
   users.push(user);
   saveUsers(users);
+  logTesterInfo(user);
   return user;
 }
 
