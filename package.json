@@ -1,0 +1,13 @@
+{
+  "name": "le-francais-facile",
+  "version": "1.0.0",
+  "description": "Offline-first French learning app for Japanese speakers (PWA)",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/serve.js . 3000",
+    "build": "node scripts/build.js",
+    "preview": "node scripts/serve.js dist 3000"
+  },
+  "keywords": ["french", "japanese", "learning", "offline", "pwa"],
+  "license": "MIT"
+}

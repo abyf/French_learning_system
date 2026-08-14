@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Le Français facile — やさしいフランス語</title>
+  <meta name="description" content="Application gratuite et hors-ligne pour apprendre le français depuis le japonais. PWA progressive, aucun compte serveur requis.">
+  <meta name="theme-color" content="#002395">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Français facile">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Le Français facile — やさしいフランス語">
+  <meta property="og:description" content="Apprenez le français depuis le japonais, niveau débutant absolu. Vocabulaire, grammaire, lecture, dictée. Fonctionne hors-ligne.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="icons/icon-512.png">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="brand">
+        <span class="brand-icon">🇫🇷</span>
+        <div>
+          <h1 data-i18n="appTitle">Le Français facile</h1>
+          <p data-i18n="appSubtitle">Apprendre le français pour les Japonais débutants</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div id="user-bar" class="user-bar"></div>
+        <div class="lang-switcher">
+          <button class="lang-btn active" data-lang="fr">Français</button>
+          <button class="lang-btn" data-lang="ja">日本語</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="feedback-banner" class="feedback-banner">
+    <p class="feedback-banner-text">
+      <span data-i18n="feedbackBannerText">Version bêta — merci de donner votre avis :</span>
+      <a href="https://forms.gle/A9QQAUbSUeGNwhFEA" target="_blank" rel="noopener noreferrer" data-i18n="feedbackBannerLink">Formulaire de feedback →</a>
+    </p>
+    <button id="feedback-banner-close" class="feedback-banner-close" aria-label="Fermer / 閉じる">✕</button>
+  </div>
+
+  <main id="app" class="app-main"></main>
+
+  <footer class="site-footer">
+    <p>Le Français facile — 100% hors ligne, aucune donnée envoyée sur internet.</p>
+  </footer>
+
+  <script src="content.js"></script>
+  <script src="daily-plan.js"></script>
+  <script src="i18n.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Register PWA service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
