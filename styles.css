@@ -325,11 +325,11 @@ input:focus-visible {
   border-radius: var(--radius);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   padding: 30px;
-  cursor: pointer;
   border: 3px solid transparent;
   transition: border-color 0.2s;
 }
@@ -338,22 +338,7 @@ input:focus-visible {
   border-color: var(--success);
 }
 
-.flashcard-face {
-  display: none;
-}
-
-.flashcard .flashcard-front {
-  display: block;
-}
-
-.flashcard.flipped .flashcard-front {
-  display: none;
-}
-
-.flashcard.flipped .flashcard-back {
-  display: block;
-}
-
+/* Le français (mot + kana) reste TOUJOURS visible, jamais caché */
 .flashcard-fr {
   font-size: 28px;
   font-weight: 700;
@@ -364,6 +349,24 @@ input:focus-visible {
 .flashcard-kana {
   color: var(--muted);
   font-size: 15px;
+}
+
+.flashcard-divider {
+  width: 60%;
+  border: none;
+  border-top: 1px solid #eef1fb;
+  margin: 16px 0;
+}
+
+.flashcard-meaning {
+  width: 100%;
+}
+
+.flashcard-meaning.meaning-hidden {
+  visibility: hidden;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 .flashcard-ja {
@@ -944,7 +947,6 @@ input:focus-visible {
 .plan-badge.status-locked .plan-badge-status,
 .plan-badge-locked {
   color: #999;
-  cursor: not-allowed;
 }
 
 .plan-badge-label {
@@ -1419,6 +1421,21 @@ input:focus-visible {
   margin-top: 3px;
 }
 
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.link-btn:hover {
+  color: var(--blue-light);
+}
+
 /* Plan badge icon (Programme page) */
 .plan-badge-icon {
   font-size: 16px;
@@ -1579,5 +1596,72 @@ input:focus-visible {
 @media (max-width: 500px) {
   .feedback-banner {
     padding: 10px 12px;
+  }
+}
+
+/* ============================================================
+   Lisibilité mobile — de nombreux textes secondaires (badges,
+   indices, libellés) sont à 10-13px, pensés pour un écran de
+   bureau. Sur téléphone, surtout pour le japonais (kanji denses),
+   c'est trop petit pour un confort de lecture. On les agrandit et
+   on élargit les cibles tactiles sur petit écran.
+   ============================================================ */
+@media (max-width: 600px) {
+  .plan-badge-preview,
+  .plan-badge-status,
+  .status-badge,
+  .activity-row-ja,
+  .activity-row-badge,
+  .activity-row-fr,
+  .today-task-extra,
+  .today-task-hint,
+  .hint-label,
+  .stage-title-ja,
+  .content-title-ja,
+  .progress-pct,
+  .flashcard-counter,
+  .session-step,
+  .session-step-arrow,
+  .session-bar-title,
+  .breadcrumb-status,
+  .breadcrumb-stage-line,
+  .today-progress-count,
+  .lang-btn,
+  .user-alias-badge,
+  .welcome-msg,
+  .feedback-banner,
+  .auth-header p,
+  .grammar-block h4,
+  .plan-badge-label {
+    font-size: 14px;
+  }
+
+  .day-pill,
+  .explore-count {
+    font-size: 13px;
+  }
+
+  /* Cibles tactiles plus grandes pour un appui plus facile sur mobile */
+  .mini-btn,
+  .icon-btn,
+  .lang-btn {
+    min-height: 38px;
+    padding: 9px 14px;
+  }
+
+  .icon-btn {
+    padding: 8px 12px;
+  }
+
+  .plan-badge {
+    min-width: 140px;
+    padding: 10px 12px;
+  }
+
+  .today-go-btn,
+  .know-btn,
+  .secondary-btn,
+  .primary-btn {
+    min-height: 40px;
   }
 }

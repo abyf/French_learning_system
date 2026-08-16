@@ -543,10 +543,10 @@ function renderTodayCard(entry) {
             <span class="status-badge status-${done ? 'done' : status}">${sectionStatusLabel(status, done)}</span>
           </div>
           ${locked
-            ? `<p class="today-task-hint">🔒 ${t('lockedHint')}</p>`
+            ? `<p class="today-task-hint">🔒 ${t('lockedHint')} <button class="link-btn" data-explore-free="${key}">${t('exploreFreelyLink')}</button></p>`
             : (preview ? `<p class="today-task-extra" title="${escapeHtml(preview)}">${escapeHtml(preview)}</p>` : '')}
         </div>
-        <button class="mini-btn today-go-btn" ${locked ? 'disabled' : ''} data-go="${key}">${done ? t('reviewButton') : t('goButton')}</button>
+        ${locked ? '' : `<button class="mini-btn today-go-btn" data-go="${key}">${done ? t('reviewButton') : t('goButton')}</button>`}
       </div>`;
   }).join('');
 
@@ -570,8 +570,10 @@ function renderTodayCard(entry) {
 
 function bindTodayCard(entry) {
   document.querySelectorAll('.today-go-btn[data-go]').forEach(btn => {
-    if (btn.disabled) return;
     btn.addEventListener('click', () => startSessionAt(entry, btn.dataset.go));
+  });
+  document.querySelectorAll('[data-explore-free]').forEach(btn => {
+    btn.addEventListener('click', () => { exitSession(); navigate(`/browse/${btn.dataset.exploreFree}`); });
   });
   const viewPlanBtn = document.getElementById('view-full-plan');
   if (viewPlanBtn) viewPlanBtn.addEventListener('click', () => navigate('/plan'));
@@ -706,7 +708,7 @@ function renderDailyPlan() {
       const locked = status === 'locked';
       const preview = locked ? null : taskContentPreview(sec, entry);
       return `<button class="plan-badge status-${done ? 'done' : status} ${locked ? 'plan-badge-locked' : ''}"
-        data-day="${i}" data-go="${sec}" ${locked ? 'disabled' : ''} ${preview ? `title="${escapeHtml(preview)}"` : ''}>
+        data-day="${i}" data-go="${sec}" ${locked ? `data-explore-free="${sec}"` : ''} ${preview ? `title="${escapeHtml(preview)}"` : (locked ? `title="${t('exploreFreelyLink')}"` : '')}>
         <span class="plan-badge-icon">${a.icon}</span>
         <span class="plan-badge-label">${t(a.titleKey)}</span>
         <span class="plan-badge-status">${sectionStatusLabel(status, done)}</span>
@@ -741,8 +743,12 @@ function renderDailyPlan() {
   bindTopNav();
   document.getElementById('back-to-today').addEventListener('click', () => navigate('/dashboard'));
   document.querySelectorAll('.plan-badge[data-go]').forEach(btn => {
-    if (btn.disabled) return;
     btn.addEventListener('click', () => {
+      if (btn.dataset.exploreFree) {
+        exitSession();
+        navigate(`/browse/${btn.dataset.exploreFree}`);
+        return;
+      }
       const entry = DAILY_PLAN[Number(btn.dataset.day)];
       startSessionAt(entry, btn.dataset.go);
     });
@@ -757,7 +763,7 @@ function renderDailyPlan() {
 // Vocabulaire — cartes retournables + quiz
 // --------------------------------------------------------
 let flashcardIndex = 0;
-let flashcardFlipped = false;
+let flashcardMeaningHidden = false; // le français (mot + kana) reste TOUJOURS visible ; seul le sens JA peut être masqué pour s'auto-tester
 let flashcardSessionKey = '';
 
 function renderVocab(stageId, dayInStage) {
@@ -775,7 +781,7 @@ function renderVocab(stageId, dayInStage) {
   if (sessionKey !== flashcardSessionKey) {
     flashcardSessionKey = sessionKey;
     flashcardIndex = 0;
-    flashcardFlipped = false;
+    flashcardMeaningHidden = false;
   }
   flashcardIndex = Math.min(flashcardIndex, indexMap.length - 1);
   const realIndex = indexMap[flashcardIndex];
@@ -792,12 +798,11 @@ function renderVocab(stageId, dayInStage) {
     ${dayFilterEntry ? `<p class="day-context-note">📅 ${t('dayLabel')} ${dayFilterEntry.day}</p>` : ''}
     <div class="flashcard-wrap">
       <p class="flashcard-counter">${t('cardLabel')} ${flashcardIndex + 1} / ${indexMap.length}</p>
-      <div class="flashcard ${flashcardFlipped ? 'flipped' : ''} ${known ? 'known' : ''}" id="flashcard">
-        <div class="flashcard-face flashcard-front">
-          <p class="flashcard-fr">${word.fr}</p>
-          <p class="flashcard-kana">${word.kana}</p>
-        </div>
-        <div class="flashcard-face flashcard-back">
+      <div class="flashcard ${known ? 'known' : ''}" id="flashcard">
+        <p class="flashcard-fr">${word.fr}</p>
+        <p class="flashcard-kana">${word.kana}</p>
+        <hr class="flashcard-divider">
+        <div class="flashcard-meaning ${flashcardMeaningHidden ? 'meaning-hidden' : ''}" id="flashcard-meaning">
           <p class="flashcard-ja">${word.ja}</p>
           <p class="flashcard-example-fr">${word.exampleFr}</p>
           <p class="flashcard-example-ja">${word.exampleJa}</p>
@@ -805,7 +810,7 @@ function renderVocab(stageId, dayInStage) {
       </div>
       <div class="flashcard-controls">
         <button class="secondary-btn" id="listen-btn">🔊 ${t('listenButton')}</button>
-        <button class="secondary-btn" id="flip-btn">${t('flipCard')}</button>
+        <button class="secondary-btn" id="flip-btn">${flashcardMeaningHidden ? t('showMeaning') : t('hideMeaning')}</button>
       </div>
       <div class="flashcard-nav">
         <button class="mini-btn" id="prev-word" ${flashcardIndex === 0 ? 'disabled' : ''}>&larr;</button>
@@ -824,10 +829,9 @@ function renderVocab(stageId, dayInStage) {
   const rerender = () => renderVocab(stageId, dayInStage);
 
   document.getElementById('listen-btn').addEventListener('click', () => speakFrench(word.fr));
-  document.getElementById('flip-btn').addEventListener('click', () => { flashcardFlipped = !flashcardFlipped; rerender(); });
-  document.getElementById('flashcard').addEventListener('click', () => { flashcardFlipped = !flashcardFlipped; rerender(); });
-  document.getElementById('prev-word').addEventListener('click', () => { flashcardIndex = Math.max(0, flashcardIndex - 1); flashcardFlipped = false; rerender(); });
-  document.getElementById('next-word').addEventListener('click', () => { flashcardIndex = Math.min(indexMap.length - 1, flashcardIndex + 1); flashcardFlipped = false; rerender(); });
+  document.getElementById('flip-btn').addEventListener('click', () => { flashcardMeaningHidden = !flashcardMeaningHidden; rerender(); });
+  document.getElementById('prev-word').addEventListener('click', () => { flashcardIndex = Math.max(0, flashcardIndex - 1); flashcardMeaningHidden = false; rerender(); });
+  document.getElementById('next-word').addEventListener('click', () => { flashcardIndex = Math.min(indexMap.length - 1, flashcardIndex + 1); flashcardMeaningHidden = false; rerender(); });
   document.getElementById('know-btn').addEventListener('click', () => {
     const list = progress[stageId].vocabKnown;
     const pos = list.indexOf(realIndex);

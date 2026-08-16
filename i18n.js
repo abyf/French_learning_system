@@ -25,6 +25,8 @@ const UI_STRINGS = {
     nextStage: "Étape suivante",
     vocabSectionTitle: "Vocabulaire",
     flipCard: "Retourner la carte",
+    hideMeaning: "Cacher le sens (s'auto-tester)",
+    showMeaning: "Afficher le sens",
     iKnowIt: "Je connais",
     needsReview: "À revoir",
     listenButton: "Écouter",
@@ -59,6 +61,8 @@ const UI_STRINGS = {
     stageComplete: "Étape terminée !",
     wordsLabel: "mots",
     speakNotSupported: "La lecture audio n'est pas prise en charge par ce navigateur.",
+    noFrenchVoiceWarning: "Aucune voix française n'est installée sur cet appareil, donc le son ne fonctionnera pas. Sur Android : Paramètres → Langues et saisie → Synthèse vocale (Text-to-speech) → paramètres du moteur Google → installez les données vocales du français.",
+    speakErrorWarning: "La lecture audio a échoué sur cet appareil. Cela arrive parfois sur Android quand la voix française n'est pas installée (voir Paramètres → Synthèse vocale).",
     langButtonFr: "Français",
     langButtonJa: "日本語",
     navPlan: "Programme",
@@ -69,7 +73,8 @@ const UI_STRINGS = {
     statusReview: "Révision",
     statusLocked: "Verrouillé",
     statusDone: "Fait",
-    lockedHint: "Terminez d'abord l'alphabet et les étapes précédentes.",
+    lockedHint: "Suggéré après le vocabulaire de l'étape en cours. Vous pouvez aussi l'explorer librement dès maintenant :",
+    exploreFreelyLink: "Explorer librement →",
     goButton: "Aller à l'exercice",
     quizReview: "Quiz de révision",
     planPageTitle: "Programme d'étude quotidien",
@@ -133,6 +138,8 @@ const UI_STRINGS = {
     nextStage: "次のステージ",
     vocabSectionTitle: "語彙",
     flipCard: "カードを裏返す",
+    hideMeaning: "意味を隠す(自己テスト)",
+    showMeaning: "意味を表示する",
     iKnowIt: "わかる",
     needsReview: "復習する",
     listenButton: "聞く",
@@ -167,6 +174,8 @@ const UI_STRINGS = {
     stageComplete: "ステージ完了!",
     wordsLabel: "単語",
     speakNotSupported: "このブラウザは音声読み上げに対応していません。",
+    noFrenchVoiceWarning: "この端末にフランス語の音声データがインストールされていないため、音声が再生されません。Android:「設定」→「言語と入力」→「テキスト読み上げの出力」→ Googleの音声合成エンジンの設定 → フランス語の音声データをインストールしてください。",
+    speakErrorWarning: "この端末で音声の再生に失敗しました。Androidでフランス語の音声データが未インストールの場合によく起こります(「設定」→「テキスト読み上げ」を確認してください)。",
     langButtonFr: "Français",
     langButtonJa: "日本語",
     navPlan: "プログラム",
@@ -177,7 +186,8 @@ const UI_STRINGS = {
     statusReview: "復習",
     statusLocked: "ロック中",
     statusDone: "完了",
-    lockedHint: "まずアルファベットと前のステージを終えましょう。",
+    lockedHint: "現在のステージの語彙の後に推奨される内容です。今すぐ自由に見ることもできます:",
+    exploreFreelyLink: "自由に見る →",
     goButton: "この課題に進む",
     quizReview: "復習クイズ",
     planPageTitle: "毎日の学習プログラム",
@@ -254,15 +264,67 @@ function initUiLanguage() {
   setUiLanguage(saved || 'fr');
 }
 
-// Lecture audio française via la synthèse vocale du navigateur (aucun fichier audio requis)
-function speakFrench(text) {
+// --------------------------------------------------------
+// Lecture audio française via la synthèse vocale du navigateur.
+// Sur Android/Chrome, les voix se chargent de façon asynchrone et
+// l'appareil peut ne pas avoir de voix française installée du tout
+// (contrairement à iOS, qui embarque de nombreuses langues) — dans
+// ce cas speak() échoue silencieusement, sans son ni erreur visible.
+// On détecte ce cas et on affiche une explication actionnable au
+// lieu de laisser l'apprenant croire que l'appli est cassée.
+// --------------------------------------------------------
+let cachedVoices = null;
+let voicesLoadingPromise = null;
+let noFrenchVoiceWarned = false;
+
+function loadVoices() {
+  if (voicesLoadingPromise) return voicesLoadingPromise;
+  voicesLoadingPromise = new Promise(resolve => {
+    const existing = window.speechSynthesis.getVoices();
+    if (existing.length) {
+      resolve(existing);
+      return;
+    }
+    let resolved = false;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      resolve(window.speechSynthesis.getVoices());
+    };
+    window.speechSynthesis.addEventListener('voiceschanged', finish, { once: true });
+    setTimeout(finish, 1200); // repli si l'événement ne se déclenche jamais (certains Android)
+  });
+  return voicesLoadingPromise;
+}
+
+async function speakFrench(text) {
   if (!('speechSynthesis' in window)) {
     alert(t('speakNotSupported'));
     return;
   }
+
+  if (!cachedVoices) {
+    cachedVoices = await loadVoices();
+  }
+  const frenchVoice = cachedVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
+
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'fr-FR';
   utterance.rate = 0.9;
+  if (frenchVoice) utterance.voice = frenchVoice;
+
+  utterance.onerror = () => {
+    if (!noFrenchVoiceWarned) {
+      noFrenchVoiceWarned = true;
+      alert(t('speakErrorWarning'));
+    }
+  };
+
+  if (!frenchVoice && !noFrenchVoiceWarned) {
+    noFrenchVoiceWarned = true;
+    alert(t('noFrenchVoiceWarning'));
+  }
+
   window.speechSynthesis.speak(utterance);
 }
