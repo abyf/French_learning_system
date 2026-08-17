@@ -1,74 +1,159 @@
 // ============================================================
-// Programme quotidien — génère un parcours Jour 0 → fin.
-// Règle : le vocabulaire d'une étape est distribué sur plusieurs
-// jours (nouveaux mots chaque jour). Une fois tout le vocabulaire
-// d'une étape appris, un "jour bilan" débloque pour la première
-// fois la grammaire, la lecture et la dictée de cette étape.
-// Les jours intermédiaires proposent ces 3 activités en RÉVISION
-// de la dernière étape déjà débloquée (ou VERROUILLÉ tout au
-// début, tant que l'alphabet n'est pas terminé).
-// Ainsi, chaque jour propose toujours les 4 sections, et les
-// prérequis sont naturellement placés au début du parcours.
+// Programme hebdomadaire guidé.
+//
+// Rythme : 2 nouvelles étapes par semaine de contenu, avec un
+// jour de révision immédiat pour chacune, puis 2 jours de
+// révision approfondie (cas similaires plus poussés), et un
+// bilan le 7e jour. Cette même paire d'étapes est ensuite
+// entièrement revue une semaine plus tard (semaine de
+// consolidation), pour un espacement d'environ une semaine
+// entre deux passages sur le même contenu.
+//
+// Semaine de contenu (introduit les étapes A puis B) :
+//   Jour 1 : nouveau contenu — étape A
+//   Jour 2 : révision de l'étape A
+//   Jour 3 : nouveau contenu — étape B
+//   Jour 4 : révision de l'étape B
+//   Jour 5 : révision approfondie de l'étape A (cas similaires)
+//   Jour 6 : révision approfondie de l'étape B (cas similaires)
+//   Jour 7 : bilan de la semaine (étapes A + B)
+//
+// Semaine de consolidation (mêmes étapes A et B, une semaine
+// plus tard, sans rien de nouveau) :
+//   Jour 1 : révision de l'étape A
+//   Jour 2 : révision approfondie de l'étape A
+//   Jour 3 : révision de l'étape B
+//   Jour 4 : révision approfondie de l'étape B
+//   Jour 5 : révision approfondie de l'étape A
+//   Jour 6 : révision approfondie de l'étape B
+//   Jour 7 : bilan de la semaine (étapes A + B)
+//
+// Avec 30 étapes (15 paires), cela donne 15 semaines de contenu
+// + 15 semaines de consolidation = 30 semaines (~210 jours,
+// soit environ 6,9 mois) — au-delà du minimum de 6 mois demandé,
+// avec un espacement régulier plutôt qu'une longue traîne de
+// révision tout à la fin.
+//
+// La révision approfondie réutilise des mécaniques déjà
+// existantes pour varier les angles de pratique plutôt que de
+// simplement répéter à l'identique :
+//   - Grammaire : conjugaison (si le point a un tableau de
+//     conjugaison) ou construction de phrases (sinon), au lieu
+//     de relire la même explication.
+//   - Lecture : mode écoute (texte caché) au lieu du mode lecture.
+//   - Vocabulaire, dictée, phrase, parler : nouvelle tentative
+//     (répétition espacée), toujours utile même sans contenu
+//     nouveau.
+//
+// Un exercice Parler s'ajoute à partir de la 2e paire d'étapes
+// (la toute première paire — alphabet, salutations — est jugée
+// trop précoce pour de la production orale).
 // ============================================================
 
-const WORDS_PER_DAY = 5;
+const STAGES_PER_PAIR = 2;
+const SPEAKING_FROM_PAIR_INDEX = 1; // 0-indexé : exclut seulement la 1re paire
 
-function distributeEvenly(total, parts) {
-  const base = Math.floor(total / parts);
-  const remainder = total % parts;
-  const result = [];
-  for (let i = 0; i < parts; i++) {
-    result.push(base + (i < remainder ? 1 : 0));
-  }
-  return result;
+function flattenPhrasebook() {
+  return PHRASEBOOK.flatMap(cat => cat.phrases.map(p => ({ ...p, category: cat.category, categoryJa: cat.categoryJa })));
+}
+
+const PHRASEBOOK_FLAT = flattenPhrasebook();
+
+function stepsForStage(mode, stageId, phraseIndex, includeSpeaking) {
+  const steps = [
+    { kind: 'vocab', stageId, mode: mode === 'new' ? 'new' : 'quiz' },
+    { kind: 'grammar', stageId, mode },
+    { kind: 'reading', stageId, mode },
+    { kind: 'dictation', stageId, mode },
+    { kind: 'phrase', phraseIndex, mode }
+  ];
+  if (includeSpeaking) steps.push({ kind: 'speaking', phraseIndex, mode });
+  return steps;
+}
+
+function testStepsForPair(stageInfos) {
+  const steps = [];
+  stageInfos.forEach(info => {
+    steps.push({ kind: 'vocab', stageId: info.stageId, mode: 'test' });
+    steps.push({ kind: 'grammar', stageId: info.stageId, mode: 'test' });
+    steps.push({ kind: 'reading', stageId: info.stageId, mode: 'test' });
+    steps.push({ kind: 'dictation', stageId: info.stageId, mode: 'test' });
+  });
+  stageInfos.forEach(info => {
+    steps.push({ kind: 'phrase', phraseIndex: info.phraseIndex, mode: 'test' });
+    if (info.includeSpeaking) steps.push({ kind: 'speaking', phraseIndex: info.phraseIndex, mode: 'test' });
+  });
+  return steps;
+}
+
+function pushWeek(days, weekMeta, weekNumber, weekKind, objectiveFr, objectiveJa, includeSpeaking, dayDefs, globalDayRef) {
+  weekMeta[weekNumber] = { objectiveFr, objectiveJa, includeSpeaking, weekKind };
+  dayDefs.forEach((def, i) => {
+    const stageForObjective = def.stageId ? CURRICULUM.find(s => s.id === def.stageId) : null;
+    days.push({
+      day: globalDayRef.value++,
+      week: weekNumber,
+      dayInWeek: i + 1,
+      dayType: def.dayType,
+      stageId: def.stageId,
+      objectiveFr: stageForObjective ? stageForObjective.titleFr : objectiveFr,
+      objectiveJa: stageForObjective ? stageForObjective.titleJa : objectiveJa,
+      steps: def.steps
+    });
+  });
 }
 
 function buildDailyPlan() {
   const days = [];
-  let globalDay = 0;
-  let lastUnlockedStage = null; // dernière étape dont grammaire/lecture/dictée sont débloquées
+  const weekMeta = {};
+  const globalDayRef = { value: 0 };
+  let globalWeek = 0;
+  let phraseCursor = 0;
 
-  CURRICULUM.forEach(stage => {
-    const words = VOCAB_LESSONS[stage.vocabId].words;
-    const vocabDayCount = Math.max(1, Math.ceil(words.length / WORDS_PER_DAY));
-    const batchSizes = distributeEvenly(words.length, vocabDayCount);
+  for (let pairIndex = 0; pairIndex * STAGES_PER_PAIR < CURRICULUM.length; pairIndex++) {
+    const pairStages = CURRICULUM.slice(pairIndex * STAGES_PER_PAIR, pairIndex * STAGES_PER_PAIR + STAGES_PER_PAIR);
+    if (pairStages.length === 0) break;
+    const includeSpeaking = pairIndex >= SPEAKING_FROM_PAIR_INDEX;
 
-    let cursor = 0;
-    for (let i = 0; i < vocabDayCount; i++) {
-      const size = batchSizes[i];
-      const wordIndexes = [];
-      for (let k = 0; k < size; k++) wordIndexes.push(cursor++);
-
-      days.push({
-        day: globalDay++,
-        stageId: stage.id,
-        stageTitleFr: stage.titleFr,
-        stageTitleJa: stage.titleJa,
-        dayType: 'vocab',
-        vocab: { mode: 'new', wordIndexes, dayInStage: i },
-        grammar: lastUnlockedStage ? { status: 'review', stageId: lastUnlockedStage } : { status: 'locked', stageId: null },
-        reading: lastUnlockedStage ? { status: 'review', stageId: lastUnlockedStage } : { status: 'locked', stageId: null },
-        dictation: lastUnlockedStage ? { status: 'review', stageId: lastUnlockedStage } : { status: 'locked', stageId: null }
-      });
-    }
-
-    // Jour bilan : débloque grammaire, lecture et dictée de l'étape en cours
-    days.push({
-      day: globalDay++,
-      stageId: stage.id,
-      stageTitleFr: stage.titleFr,
-      stageTitleJa: stage.titleJa,
-      dayType: 'capstone',
-      vocab: { mode: 'quiz' },
-      grammar: { status: 'new', stageId: stage.id },
-      reading: { status: 'new', stageId: stage.id },
-      dictation: { status: 'new', stageId: stage.id }
+    const stageInfos = pairStages.map(stage => {
+      const phraseIndex = phraseCursor % PHRASEBOOK_FLAT.length;
+      phraseCursor++;
+      return { stage, stageId: stage.id, phraseIndex, includeSpeaking };
     });
+    const [infoA, infoB] = stageInfos;
 
-    lastUnlockedStage = stage.id;
-  });
+    const objectiveFr = pairStages.map(s => s.titleFr).join(' · ');
+    const objectiveJa = pairStages.map(s => s.titleJa).join(' · ');
 
-  return days;
+    // ---- Semaine de contenu ----
+    globalWeek++;
+    pushWeek(days, weekMeta, globalWeek, 'content', objectiveFr, objectiveJa, includeSpeaking, [
+      { dayType: 'new', stageId: infoA.stageId, steps: stepsForStage('new', infoA.stageId, infoA.phraseIndex, includeSpeaking) },
+      { dayType: 'review', stageId: infoA.stageId, steps: stepsForStage('review', infoA.stageId, infoA.phraseIndex, includeSpeaking) },
+      { dayType: 'new', stageId: infoB.stageId, steps: stepsForStage('new', infoB.stageId, infoB.phraseIndex, includeSpeaking) },
+      { dayType: 'review', stageId: infoB.stageId, steps: stepsForStage('review', infoB.stageId, infoB.phraseIndex, includeSpeaking) },
+      { dayType: 'extended', stageId: infoA.stageId, steps: stepsForStage('extended', infoA.stageId, infoA.phraseIndex, includeSpeaking) },
+      { dayType: 'extended', stageId: infoB.stageId, steps: stepsForStage('extended', infoB.stageId, infoB.phraseIndex, includeSpeaking) },
+      { dayType: 'test', stageId: null, steps: testStepsForPair(stageInfos) }
+    ], globalDayRef);
+
+    // ---- Semaine de consolidation (mêmes étapes, 1 semaine plus tard) ----
+    globalWeek++;
+    pushWeek(days, weekMeta, globalWeek, 'consolidation', objectiveFr, objectiveJa, includeSpeaking, [
+      { dayType: 'review', stageId: infoA.stageId, steps: stepsForStage('review', infoA.stageId, infoA.phraseIndex, includeSpeaking) },
+      { dayType: 'extended', stageId: infoA.stageId, steps: stepsForStage('extended', infoA.stageId, infoA.phraseIndex, includeSpeaking) },
+      { dayType: 'review', stageId: infoB.stageId, steps: stepsForStage('review', infoB.stageId, infoB.phraseIndex, includeSpeaking) },
+      { dayType: 'extended', stageId: infoB.stageId, steps: stepsForStage('extended', infoB.stageId, infoB.phraseIndex, includeSpeaking) },
+      { dayType: 'extended', stageId: infoA.stageId, steps: stepsForStage('extended', infoA.stageId, infoA.phraseIndex, includeSpeaking) },
+      { dayType: 'extended', stageId: infoB.stageId, steps: stepsForStage('extended', infoB.stageId, infoB.phraseIndex, includeSpeaking) },
+      { dayType: 'test', stageId: null, steps: testStepsForPair(stageInfos) }
+    ], globalDayRef);
+  }
+
+  return { days, weekMeta };
 }
 
-const DAILY_PLAN = buildDailyPlan();
+const _dailyPlanBuild = buildDailyPlan();
+const DAILY_PLAN = _dailyPlanBuild.days;
+const WEEK_META = _dailyPlanBuild.weekMeta;
+const TOTAL_WEEKS = Object.keys(WEEK_META).length;

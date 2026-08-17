@@ -27,7 +27,6 @@
   <header class="site-header">
     <div class="site-header-inner">
       <div class="brand">
-        <span class="brand-icon">🇫🇷</span>
         <div>
           <h1 data-i18n="appTitle">Le Français facile</h1>
           <p data-i18n="appSubtitle">Apprendre le français pour les Japonais débutants</p>
@@ -51,10 +50,16 @@
     <button id="feedback-banner-close" class="feedback-banner-close" aria-label="Fermer / 閉じる">✕</button>
   </div>
 
+  <div id="translation-bar" class="translation-bar">
+    <span class="translation-bar-label" data-i18n="translationBarLabel">Traduction japonaise :</span>
+    <button class="translation-toggle-btn" id="translation-toggle-btn" aria-pressed="false"></button>
+  </div>
+
   <main id="app" class="app-main"></main>
 
   <footer class="site-footer">
-    <p>Le Français facile — 100% hors ligne, aucune donnée envoyée sur internet.</p>
+    <img src="icons/nipponmboa-logo.svg" alt="Nipponmboa Consulting" class="site-footer-logo">
+    <p class="site-footer-text" data-i18n="footerCopyright">© 2026 Nipponmboa Consulting. Tous droits réservés.</p>
   </footer>
 
   <script src="content.js"></script>

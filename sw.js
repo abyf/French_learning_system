@@ -11,7 +11,7 @@
 // cache propre (le navigateur détecte que ce fichier a changé et
 // réinstalle le service worker automatiquement).
 // ============================================================
-const CACHE_VERSION = 'lff-v2';
+const CACHE_VERSION = 'lff-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -23,7 +23,8 @@ const ASSETS = [
   './app.js',
   './manifest.json',
   './icons/icon-192.svg',
-  './icons/icon-512.svg'
+  './icons/icon-512.svg',
+  './icons/nipponmboa-logo.svg'
 ];
 
 // Install — pre-cache all assets
