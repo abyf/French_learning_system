@@ -118,14 +118,36 @@ function getCurrentDayIndex() {
 // inclut phrase/parler en plus des 4 piliers du programme.
 // --------------------------------------------------------
 const DAY_KIND_META = {
-  vocab: { titleKey: 'navVocabulary' },
-  grammar: { titleKey: 'navGrammar' },
-  reading: { titleKey: 'navReading' },
-  dictation: { titleKey: 'navDictation' },
-  phrase: { titleKey: 'phrasesNavLabel' },
-  speaking: { titleKey: 'speakingNavLabel' }
+  vocab: { titleKey: 'navVocabulary', color: 'var(--c-vocab)' },
+  grammar: { titleKey: 'navGrammar', color: 'var(--c-grammar)' },
+  reading: { titleKey: 'navReading', color: 'var(--c-reading)' },
+  dictation: { titleKey: 'navDictation', color: 'var(--c-dictation)' },
+  phrase: { titleKey: 'phrasesNavLabel', color: 'var(--c-phrase)' },
+  speaking: { titleKey: 'speakingNavLabel', color: 'var(--c-speaking)' }
 };
 const DAY_KIND_ORDER = ['vocab', 'grammar', 'reading', 'dictation', 'phrase', 'speaking'];
+
+// Illustrations légères (icônes SVG dessinées, pas d'emoji) pour
+// distinguer visuellement chaque type d'activité. Trait « currentColor »
+// pour hériter de la couleur du contexte.
+function kindIconSvg(kind) {
+  const icons = {
+    // Cartes de vocabulaire
+    vocab: '<rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h14v12"/><line x1="6" y1="10" x2="14" y2="10"/><line x1="6" y1="14" x2="11" y2="14"/>',
+    // Livre de grammaire
+    grammar: '<path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/><line x1="9" y1="7" x2="16" y2="7"/><line x1="9" y1="11" x2="16" y2="11"/>',
+    // Texte de lecture
+    reading: '<path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="16" x2="14" y2="16"/>',
+    // Crayon (dictée)
+    dictation: '<path d="M4 20h4l10-10-4-4L4 16z"/><line x1="13" y1="6" x2="17" y2="10"/>',
+    // Bulle (phrases utiles)
+    phrase: '<path d="M4 5h16v11H9l-4 4v-4H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="12" x2="13" y2="12"/>',
+    // Micro (parler)
+    speaking: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/>'
+  };
+  const paths = icons[kind] || '';
+  return `<svg class="kind-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+}
 const DAY_TYPE_LABEL_KEY = { new: 'dayTypeNew', review: 'dayTypeReview', extended: 'dayTypeExtended', test: 'dayTypeTest' };
 
 function entryKinds(entry) {
@@ -372,6 +394,11 @@ window.addEventListener('hashchange', render);
 function render() {
   if (!currentUser) return renderAuthScreen(authMode);
   const route = parseRoute();
+  renderRoute(route);
+  updateSessionNav();
+}
+
+function renderRoute(route) {
   switch (route.view) {
     case 'vocab': return renderVocab(route.stageId);
     case 'vocabquiz': return renderVocabQuiz(route.stageId, 0, 0);
@@ -422,9 +449,11 @@ function topNav(activeStageId, activeView) {
 // --------------------------------------------------------
 function activityBreadcrumb(kind, stage, done, doneLabel) {
   const meta = ACTIVITY_KINDS.find(a => a.kind === kind);
+  const color = (DAY_KIND_META[kind] && DAY_KIND_META[kind].color) || 'var(--blue)';
   return `
-    <div class="activity-breadcrumb">
+    <div class="activity-breadcrumb" style="--kind-color:${color}">
       <div class="breadcrumb-kind-badge">
+        ${kindIconSvg(kind)}
         <span class="breadcrumb-kind-label">${t(meta.titleKey)}</span>
       </div>
       <div class="breadcrumb-stage-info">
@@ -528,8 +557,6 @@ function markStepDoneIfActive(kind, matchId) {
 function renderSessionBar() {
   if (!sessionState) return '';
   const entry = DAILY_PLAN[sessionState.day];
-  const currentDone = isStepDone(entry.day, sessionState.taskIndex);
-  const isLast = sessionState.taskIndex === sessionState.tasks.length - 1;
 
   const steps = sessionState.tasks.map((step, i) => {
     const meta = DAY_KIND_META[step.kind];
@@ -554,35 +581,17 @@ function renderSessionBar() {
         </div>
       </div>
       <div class="session-steps">${steps}</div>
-      ${currentDone ? `
-        <div class="session-complete-banner">
-          <span>${t('taskCompleteMsg')}</span>
-          <button class="primary-btn" id="session-continue-btn">${isLast ? t('finishSession') : t('continueToNext')}</button>
-        </div>` : ''}
     </div>`;
 }
 
 function bindSessionBar() {
+  updateSessionNav();
   if (!sessionState) return;
   const exitBtn = document.getElementById('session-exit-btn');
   if (exitBtn) exitBtn.addEventListener('click', () => { exitSession(); navigate('/dashboard'); });
 
   const stopTodayBtn = document.getElementById('session-stop-today-btn');
   if (stopTodayBtn) stopTodayBtn.addEventListener('click', () => { exitSession(); justStoppedForToday = true; navigate('/dashboard'); });
-
-  const continueBtn = document.getElementById('session-continue-btn');
-  if (continueBtn) {
-    continueBtn.addEventListener('click', () => {
-      const isLast = sessionState.taskIndex === sessionState.tasks.length - 1;
-      if (isLast) {
-        exitSession();
-        navigate('/dashboard');
-      } else {
-        sessionState.taskIndex++;
-        goToSessionTask();
-      }
-    });
-  }
 }
 
 function refreshSessionBar() {
@@ -591,6 +600,82 @@ function refreshSessionBar() {
   if (!container) return;
   container.outerHTML = renderSessionBar();
   bindSessionBar();
+}
+
+// --------------------------------------------------------
+// Barre de navigation fixe en bas de l'écran (mode guidé) — offre
+// un bouton « Suivant → » toujours visible, sans avoir à remonter,
+// plus un rappel clair de ce qu'il faut faire sur l'écran courant.
+// Répond à deux retours : « je ne sais pas quoi faire ensuite » et
+// « pouvoir avancer simplement avec → ».
+// --------------------------------------------------------
+function stepActionHint(step) {
+  switch (step.kind) {
+    case 'vocab': return step.mode === 'new' ? t('navHintVocab') : t('navHintVocabQuiz');
+    case 'grammar': return step.mode === 'extended' ? t('navHintGrammarPractice') : t('navHintGrammar');
+    case 'reading': return t('navHintReading');
+    case 'dictation': return t('navHintDictation');
+    case 'phrase': return t('navHintPhrase');
+    case 'speaking': return t('navHintSpeaking');
+    default: return '';
+  }
+}
+
+function markCurrentStepDone() {
+  if (!sessionState) return;
+  if (!progress._dayDone) progress._dayDone = {};
+  if (!progress._dayDone[sessionState.day]) progress._dayDone[sessionState.day] = {};
+  progress._dayDone[sessionState.day][sessionState.taskIndex] = true;
+  saveProgress(progress);
+}
+
+function advanceSession() {
+  if (!sessionState) return;
+  // Avancer marque l'étape courante comme faite : dans une séance
+  // guidée, passer à la suite vaut engagement. La progression réelle
+  // (score de quiz, mots connus) reste enregistrée à part quand
+  // l'apprenant fait vraiment l'activité.
+  markCurrentStepDone();
+  const isLast = sessionState.taskIndex === sessionState.tasks.length - 1;
+  if (isLast) {
+    exitSession();
+    navigate('/dashboard');
+  } else {
+    sessionState.taskIndex++;
+    goToSessionTask();
+  }
+}
+
+function updateSessionNav() {
+  let nav = document.getElementById('session-nav');
+  if (!sessionState || !sessionState.tasks[sessionState.taskIndex]) {
+    if (nav) nav.remove();
+    document.body.classList.remove('has-session-nav');
+    return;
+  }
+  const entry = DAILY_PLAN[sessionState.day];
+  const step = sessionState.tasks[sessionState.taskIndex];
+  const done = isStepDone(entry.day, sessionState.taskIndex);
+  const isLast = sessionState.taskIndex === sessionState.tasks.length - 1;
+  const meta = DAY_KIND_META[step.kind];
+  const color = (meta && meta.color) || 'var(--blue)';
+
+  if (!nav) {
+    nav = document.createElement('div');
+    nav.id = 'session-nav';
+    nav.className = 'session-nav';
+    document.body.appendChild(nav);
+  }
+  document.body.classList.add('has-session-nav');
+  nav.style.setProperty('--kind-color', color);
+  nav.innerHTML = `
+    <div class="session-nav-info">
+      <span class="session-nav-step">${t('taskLabel')} ${sessionState.taskIndex + 1}/${sessionState.tasks.length} · ${t(meta.titleKey)}</span>
+      <span class="session-nav-hint ${done ? 'is-done' : ''}">${done ? t('navStepDoneHint') : stepActionHint(step)}</span>
+    </div>
+    <button class="session-nav-next ${done ? 'is-done' : ''}" id="session-nav-next-btn">${isLast ? t('finishSession') : t('nextArrowLabel')}</button>
+  `;
+  document.getElementById('session-nav-next-btn').addEventListener('click', advanceSession);
 }
 
 function stagePager(stageId, view) {

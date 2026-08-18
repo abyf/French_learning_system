@@ -10,18 +10,26 @@
   --red: #ed2939;
   --bg: #f4f6fb;
   --card-bg: #ffffff;
-  --text: #1f2430;
-  --muted: #6b7280;
+  --text: #12161d;
+  --muted: #4b5563;
   --success: #1b8a4c;
   --error: #c0392b;
   --radius: 14px;
+  /* Couleurs par type d'activité (pour le repérage visuel) */
+  --c-vocab: #0f766e;
+  --c-grammar: #1d4ed8;
+  --c-reading: #7c3aed;
+  --c-dictation: #be123c;
+  --c-phrase: #b45309;
+  --c-speaking: #0e7490;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.6;
+  line-height: 1.65;
+  font-size: 16px;
 }
 
 /* Header */
@@ -1445,6 +1453,7 @@ input:focus-visible {
   flex-wrap: wrap;
   background: var(--card-bg);
   border-radius: var(--radius);
+  border-left: 5px solid var(--kind-color, var(--blue));
   padding: 16px 20px;
   margin-bottom: 18px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -1454,7 +1463,7 @@ input:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, var(--blue), var(--blue-light));
+  background: var(--kind-color, var(--blue));
   color: #fff;
   padding: 10px 16px;
   border-radius: 10px;
@@ -1463,6 +1472,12 @@ input:focus-visible {
 
 .breadcrumb-icon {
   font-size: 22px;
+}
+
+.kind-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
 }
 
 .breadcrumb-kind-label {
@@ -1680,24 +1695,97 @@ input:focus-visible {
   font-size: 12px;
 }
 
-.session-complete-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 12px 14px;
-  background: #e6f6ec;
-  border-radius: 10px;
-  font-weight: 600;
-  color: var(--success);
-}
-
 @media (max-width: 600px) {
   .session-bar-top {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* Barre de navigation fixe en bas — bouton « Suivant → » toujours visible */
+.session-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 20px;
+  background: #fff;
+  border-top: 3px solid var(--kind-color, var(--blue));
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.session-nav-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.session-nav-step {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--kind-color, var(--blue));
+}
+
+.session-nav-hint {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.session-nav-hint.is-done {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.session-nav-next {
+  flex-shrink: 0;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  background: var(--kind-color, var(--blue));
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.session-nav-next:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+.session-nav-next.is-done {
+  animation: nav-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes nav-pulse {
+  0%, 100% { box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); }
+  50% { box-shadow: 0 3px 18px var(--kind-color, var(--blue)); }
+}
+
+/* Laisse de la place pour ne pas cacher le contenu sous la barre fixe */
+body.has-session-nav .app-main {
+  padding-bottom: 96px;
+}
+
+@media (max-width: 600px) {
+  .session-nav {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .session-nav-next {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+  .session-nav-hint {
+    font-size: 13px;
   }
 }
 
