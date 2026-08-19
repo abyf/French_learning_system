@@ -16,6 +16,7 @@ const FILES = [
   'index.html',
   'styles.css',
   'content.js',
+  'illustrations.js',
   'daily-plan.js',
   'i18n.js',
   'auth.js',

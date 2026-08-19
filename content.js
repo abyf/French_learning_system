@@ -38,7 +38,16 @@ const CURRICULUM = [
   { id: 's26', order: 27, titleFr: "Faire des achats / à l'hôtel", titleJa: "買い物・ホテルで", vocabId: 's26', grammarId: 'g26', readingId: 'r26', dictationIds: ['d26a', 'd26b'] },
   { id: 's27', order: 28, titleFr: "Les fêtes et invitations", titleJa: "パーティーと招待", vocabId: 's27', grammarId: 'g27', readingId: 'r27', dictationIds: ['d27a', 'd27b'] },
   { id: 's28', order: 29, titleFr: "Parler du passé (mouvement)", titleJa: "過去を語る(移動動詞)", vocabId: 's28', grammarId: 'g28', readingId: 'r28', dictationIds: ['d28a', 'd28b'] },
-  { id: 's29', order: 30, titleFr: "Révision générale", titleJa: "総復習", vocabId: 's29', grammarId: 'g29', readingId: 'r29', dictationIds: ['d29a', 'd29b'] }
+  { id: 's29', order: 30, titleFr: "Révision générale", titleJa: "総復習", vocabId: 's29', grammarId: 'g29', readingId: 'r29', dictationIds: ['d29a', 'd29b'] },
+  // ---- Extension niveau A2 (petit intermédiaire) ----
+  { id: 's30', order: 31, titleFr: "Les verbes pronominaux", titleJa: "代名動詞(se laver など)", vocabId: 's30', grammarId: 'g30', readingId: 'r30', dictationIds: ['d30a', 'd30b'] },
+  { id: 's31', order: 32, titleFr: "L'imparfait", titleJa: "半過去", vocabId: 's31', grammarId: 'g31', readingId: 'r31', dictationIds: ['d31a', 'd31b'] },
+  { id: 's32', order: 33, titleFr: "Imparfait ou passé composé ?", titleJa: "半過去と複合過去の使い分け", vocabId: 's32', grammarId: 'g32', readingId: 'r32', dictationIds: ['d32a', 'd32b'] },
+  { id: 's33', order: 34, titleFr: "Les pronoms COD (le, la, les)", titleJa: "直接目的語代名詞(le, la, les)", vocabId: 's33', grammarId: 'g33', readingId: 'r33', dictationIds: ['d33a', 'd33b'] },
+  { id: 's34', order: 35, titleFr: "Les pronoms COI, y et en", titleJa: "間接目的語代名詞・y・en", vocabId: 's34', grammarId: 'g34', readingId: 'r34', dictationIds: ['d34a', 'd34b'] },
+  { id: 's35', order: 36, titleFr: "Les pronoms relatifs (qui, que, où)", titleJa: "関係代名詞(qui, que, où)", vocabId: 's35', grammarId: 'g35', readingId: 'r35', dictationIds: ['d35a', 'd35b'] },
+  { id: 's36', order: 37, titleFr: "Le futur simple", titleJa: "単純未来", vocabId: 's36', grammarId: 'g36', readingId: 'r36', dictationIds: ['d36a', 'd36b'] },
+  { id: 's37', order: 38, titleFr: "Le conditionnel de politesse", titleJa: "条件法(丁寧表現)", vocabId: 's37', grammarId: 'g37', readingId: 'r37', dictationIds: ['d37a', 'd37b'] }
 ];
 
 // --------------------------------------------------------
@@ -509,6 +518,126 @@ const VOCAB_LESSONS = {
       { fr: "ça dépend", kana: "サ・デパン", ja: "場合による", exampleFr: "Ça dépend du temps.", exampleJa: "天気によるね。" },
       { fr: "bien sûr", kana: "ビヤン・スュール", ja: "もちろん", exampleFr: "Bien sûr, je peux t'aider !", exampleJa: "もちろん、手伝えるよ!" },
       { fr: "exactement", kana: "エグザクトマン", ja: "まさに、その通り", exampleFr: "Exactement, tu as raison !", exampleJa: "その通り、あなたが正しい!" }
+    ]
+  },
+  s30: {
+    titleFr: "Les verbes pronominaux", titleJa: "代名動詞",
+    words: [
+      { fr: "se lever", kana: "ス・ルヴェ", ja: "起きる、立ち上がる", exampleFr: "Je me lève à sept heures.", exampleJa: "私は7時に起きます。" },
+      { fr: "se laver", kana: "ス・ラヴェ", ja: "(自分の体を)洗う", exampleFr: "Il se lave les mains.", exampleJa: "彼は手を洗います。" },
+      { fr: "se brosser les dents", kana: "ス・ブロセ・レ・ダン", ja: "歯を磨く", exampleFr: "Elle se brosse les dents.", exampleJa: "彼女は歯を磨きます。" },
+      { fr: "s'habiller", kana: "サビエ", ja: "服を着る", exampleFr: "Je m'habille vite le matin.", exampleJa: "私は朝、素早く服を着ます。" },
+      { fr: "se coucher", kana: "ス・クシェ", ja: "寝る、横になる", exampleFr: "Nous nous couchons tard.", exampleJa: "私たちは遅く寝ます。" },
+      { fr: "se réveiller", kana: "ス・レヴェイエ", ja: "目を覚ます", exampleFr: "Tu te réveilles tôt ?", exampleJa: "早く目が覚めるの?" },
+      { fr: "se reposer", kana: "ス・ルポゼ", ja: "休む", exampleFr: "Le dimanche, je me repose.", exampleJa: "日曜日は休みます。" },
+      { fr: "se dépêcher", kana: "ス・デペシェ", ja: "急ぐ", exampleFr: "Dépêche-toi, on est en retard !", exampleJa: "急いで、遅れてるよ!" },
+      { fr: "se promener", kana: "ス・プロムネ", ja: "散歩する", exampleFr: "Ils se promènent au parc.", exampleJa: "彼らは公園を散歩します。" },
+      { fr: "se souvenir", kana: "ス・スヴニール", ja: "思い出す、覚えている", exampleFr: "Je me souviens de ce jour.", exampleJa: "私はその日を覚えています。" }
+    ]
+  },
+  s31: {
+    titleFr: "L'imparfait", titleJa: "半過去",
+    words: [
+      { fr: "autrefois", kana: "オトルフォワ", ja: "昔は", exampleFr: "Autrefois, j'habitais à Tokyo.", exampleJa: "昔は東京に住んでいました。" },
+      { fr: "quand j'étais petit(e)", kana: "カン・ジェテ・プティ", ja: "私が小さかった頃", exampleFr: "Quand j'étais petit, je jouais dehors.", exampleJa: "小さかった頃、外で遊んでいました。" },
+      { fr: "souvent", kana: "スヴァン", ja: "よく、しばしば", exampleFr: "Elle venait souvent ici.", exampleJa: "彼女はよくここに来ていました。" },
+      { fr: "d'habitude", kana: "ダビチュード", ja: "普段は", exampleFr: "D'habitude, on dînait à huit heures.", exampleJa: "普段は8時に夕食を食べていました。" },
+      { fr: "à l'époque", kana: "ア・レポック", ja: "当時は", exampleFr: "À l'époque, il n'y avait pas de téléphone.", exampleJa: "当時は電話がありませんでした。" },
+      { fr: "l'enfance", kana: "ランファンス", ja: "子供時代", exampleFr: "Mon enfance était heureuse.", exampleJa: "私の子供時代は幸せでした。" },
+      { fr: "un souvenir", kana: "アン・スヴニール", ja: "思い出", exampleFr: "C'est un beau souvenir.", exampleJa: "それは素敵な思い出です。" },
+      { fr: "tranquille", kana: "トランキル", ja: "静かな、穏やかな", exampleFr: "Le village était tranquille.", exampleJa: "その村は静かでした。" },
+      { fr: "chaque été", kana: "シャク・エテ", ja: "毎年夏に", exampleFr: "Chaque été, nous allions à la mer.", exampleJa: "毎年夏、私たちは海に行っていました。" },
+      { fr: "il était une fois", kana: "イレテ・チュヌ・フォワ", ja: "むかしむかし", exampleFr: "Il était une fois une princesse.", exampleJa: "むかしむかし、お姫様がいました。" }
+    ]
+  },
+  s32: {
+    titleFr: "Imparfait ou passé composé ?", titleJa: "半過去と複合過去",
+    words: [
+      { fr: "soudain", kana: "スダン", ja: "突然", exampleFr: "Soudain, il a commencé à pleuvoir.", exampleJa: "突然、雨が降り始めました。" },
+      { fr: "tout à coup", kana: "トゥ・タ・ク", ja: "突然、いきなり", exampleFr: "Tout à coup, le téléphone a sonné.", exampleJa: "いきなり電話が鳴りました。" },
+      { fr: "pendant que", kana: "パンダン・ク", ja: "〜している間に", exampleFr: "Pendant que je lisais, il dormait.", exampleJa: "私が読書している間、彼は寝ていました。" },
+      { fr: "un jour", kana: "アン・ジュール", ja: "ある日", exampleFr: "Un jour, j'ai rencontré Paul.", exampleJa: "ある日、ポールに出会いました。" },
+      { fr: "d'abord", kana: "ダボール", ja: "まず、最初に", exampleFr: "D'abord, nous avons mangé.", exampleJa: "まず、私たちは食べました。" },
+      { fr: "ensuite", kana: "アンスュイット", ja: "それから", exampleFr: "Ensuite, nous sommes sortis.", exampleJa: "それから、出かけました。" },
+      { fr: "enfin", kana: "アンファン", ja: "ついに、最後に", exampleFr: "Enfin, il est arrivé.", exampleJa: "ついに彼が到着しました。" },
+      { fr: "à ce moment-là", kana: "ア・ス・モマン・ラ", ja: "その時", exampleFr: "À ce moment-là, tout a changé.", exampleJa: "その時、すべてが変わりました。" },
+      { fr: "plusieurs fois", kana: "プリュジュール・フォワ", ja: "何度も", exampleFr: "J'ai essayé plusieurs fois.", exampleJa: "私は何度も試しました。" },
+      { fr: "tranquillement", kana: "トランキルマン", ja: "静かに、のんびりと", exampleFr: "Il lisait tranquillement.", exampleJa: "彼はのんびり読書していました。" }
+    ]
+  },
+  s33: {
+    titleFr: "Les pronoms COD", titleJa: "直接目的語代名詞",
+    words: [
+      { fr: "voir", kana: "ヴォワール", ja: "見る、会う", exampleFr: "Mes amis ? Je les vois souvent.", exampleJa: "友達?よく会います。" },
+      { fr: "connaître", kana: "コネートル", ja: "(人・場所を)知っている", exampleFr: "Cette fille, tu la connais ?", exampleJa: "あの子、知ってる?" },
+      { fr: "regarder", kana: "ルガルデ", ja: "見る", exampleFr: "Ce film ? Je le regarde ce soir.", exampleJa: "この映画?今夜見ます。" },
+      { fr: "inviter", kana: "アンヴィテ", ja: "招待する", exampleFr: "Mes amis ? Je les invite à la fête.", exampleJa: "友達?パーティーに招待します。" },
+      { fr: "appeler", kana: "アプレ", ja: "呼ぶ、電話する", exampleFr: "Je t'appelle ce soir.", exampleJa: "今夜あなたに電話します。" },
+      { fr: "aider", kana: "エデ", ja: "助ける", exampleFr: "Il m'aide toujours.", exampleJa: "彼はいつも私を助けてくれます。" },
+      { fr: "comprendre", kana: "コンプランドル", ja: "理解する", exampleFr: "Ce mot ? Je ne le comprends pas.", exampleJa: "この単語?分かりません。" },
+      { fr: "écouter", kana: "エクテ", ja: "聞く", exampleFr: "Cette chanson ? Je l'écoute souvent.", exampleJa: "この歌?よく聞きます。" },
+      { fr: "acheter", kana: "アシュテ", ja: "買う", exampleFr: "Ce livre ? Je l'achète.", exampleJa: "この本?買います。" },
+      { fr: "prendre", kana: "プランドル", ja: "取る、(乗り物に)乗る", exampleFr: "Le bus ? Je le prends tous les jours.", exampleJa: "バス?毎日乗ります。" }
+    ]
+  },
+  s34: {
+    titleFr: "Les pronoms COI, y et en", titleJa: "間接目的語代名詞・y・en",
+    words: [
+      { fr: "téléphoner à", kana: "テレフォネ・ア", ja: "〜に電話する", exampleFr: "Ma mère ? Je lui téléphone souvent.", exampleJa: "母?よく電話します。" },
+      { fr: "répondre à", kana: "レポンドル・ア", ja: "〜に答える", exampleFr: "À mes amis ? Je leur réponds vite.", exampleJa: "友達に?すぐ返事します。" },
+      { fr: "offrir à", kana: "オフリール・ア", ja: "〜に贈る", exampleFr: "À mes parents ? Je leur offre un cadeau.", exampleJa: "両親に?プレゼントを贈ります。" },
+      { fr: "donner à", kana: "ドネ・ア", ja: "〜に与える", exampleFr: "À Paul ? Je lui donne le livre.", exampleJa: "ポールに?本をあげます。" },
+      { fr: "montrer à", kana: "モントレ・ア", ja: "〜に見せる", exampleFr: "Il nous montre les photos.", exampleJa: "彼は私たちに写真を見せます。" },
+      { fr: "penser à", kana: "パンセ・ア", ja: "〜のことを考える", exampleFr: "À tes vacances ? J'y pense souvent.", exampleJa: "休暇のこと?よく考えます。" },
+      { fr: "parler de", kana: "パルレ・ド", ja: "〜について話す", exampleFr: "De ce problème ? Nous en parlons.", exampleJa: "この問題について?話し合います。" },
+      { fr: "avoir besoin de", kana: "アヴォワール・ブゾワン・ド", ja: "〜が必要", exampleFr: "De ton aide ? J'en ai besoin.", exampleJa: "あなたの助け?必要です。" },
+      { fr: "aller à", kana: "アレ・ア", ja: "〜へ行く", exampleFr: "À Paris ? J'y vais demain.", exampleJa: "パリへ?明日行きます。" },
+      { fr: "revenir de", kana: "ルヴニール・ド", ja: "〜から戻る", exampleFr: "Du marché ? J'en reviens.", exampleJa: "市場から?今戻ってきたところです。" }
+    ]
+  },
+  s35: {
+    titleFr: "Les pronoms relatifs", titleJa: "関係代名詞",
+    words: [
+      { fr: "la personne", kana: "ラ・ペルソンヌ", ja: "人", exampleFr: "La personne qui parle est ma sœur.", exampleJa: "話している人は私の姉(妹)です。" },
+      { fr: "l'endroit", kana: "ランドロワ", ja: "場所", exampleFr: "L'endroit où je travaille est loin.", exampleJa: "私が働く場所は遠いです。" },
+      { fr: "le moment", kana: "ル・モマン", ja: "瞬間、時", exampleFr: "C'est le moment où tout commence.", exampleJa: "すべてが始まる時です。" },
+      { fr: "l'histoire", kana: "リストワール", ja: "話、物語", exampleFr: "L'histoire que tu racontes est drôle.", exampleJa: "あなたが話す物語は面白いです。" },
+      { fr: "le film", kana: "ル・フィルム", ja: "映画", exampleFr: "Le film que j'ai vu était triste.", exampleJa: "私が見た映画は悲しかったです。" },
+      { fr: "la ville", kana: "ラ・ヴィル", ja: "町、都市", exampleFr: "La ville où je suis né est petite.", exampleJa: "私が生まれた町は小さいです。" },
+      { fr: "l'ami", kana: "ラミ", ja: "友達", exampleFr: "L'ami qui m'aide s'appelle Léo.", exampleJa: "私を助けてくれる友達はレオです。" },
+      { fr: "la chose", kana: "ラ・ショーズ", ja: "こと、もの", exampleFr: "La chose que j'aime, c'est lire.", exampleJa: "私が好きなことは読書です。" },
+      { fr: "le jour", kana: "ル・ジュール", ja: "日", exampleFr: "Le jour où je t'ai rencontré était spécial.", exampleJa: "あなたに出会った日は特別でした。" },
+      { fr: "la raison", kana: "ラ・レゾン", ja: "理由", exampleFr: "C'est la raison qui compte le plus.", exampleJa: "それが最も大事な理由です。" }
+    ]
+  },
+  s36: {
+    titleFr: "Le futur simple", titleJa: "単純未来",
+    words: [
+      { fr: "l'avenir", kana: "ラヴニール", ja: "未来", exampleFr: "L'avenir sera meilleur.", exampleJa: "未来はもっと良くなるでしょう。" },
+      { fr: "un projet", kana: "アン・プロジェ", ja: "計画", exampleFr: "J'ai un projet important.", exampleJa: "私には大事な計画があります。" },
+      { fr: "un rêve", kana: "アン・レーヴ", ja: "夢", exampleFr: "Un jour, je réaliserai mon rêve.", exampleJa: "いつか夢を叶えます。" },
+      { fr: "réussir", kana: "レユシール", ja: "成功する", exampleFr: "Tu réussiras, j'en suis sûr.", exampleJa: "あなたは成功するよ、確信してる。" },
+      { fr: "voyager", kana: "ヴォワイヤジェ", ja: "旅行する", exampleFr: "Je voyagerai en France.", exampleJa: "私はフランスを旅するでしょう。" },
+      { fr: "devenir", kana: "ドゥヴニール", ja: "〜になる", exampleFr: "Elle deviendra médecin.", exampleJa: "彼女は医者になるでしょう。" },
+      { fr: "changer", kana: "シャンジェ", ja: "変わる、変える", exampleFr: "Les choses changeront.", exampleJa: "物事は変わるでしょう。" },
+      { fr: "espérer", kana: "エスペレ", ja: "望む、期待する", exampleFr: "J'espère qu'il fera beau.", exampleJa: "晴れることを願っています。" },
+      { fr: "préparer", kana: "プレパレ", ja: "準備する", exampleFr: "Je préparerai le dîner.", exampleJa: "私は夕食を準備します。" },
+      { fr: "plus tard", kana: "プリュ・タール", ja: "後で、将来", exampleFr: "Plus tard, j'habiterai à Paris.", exampleJa: "将来、パリに住むでしょう。" }
+    ]
+  },
+  s37: {
+    titleFr: "Le conditionnel de politesse", titleJa: "条件法(丁寧表現)",
+    words: [
+      { fr: "je voudrais", kana: "ジュ・ヴドレ", ja: "〜が欲しいのですが(丁寧)", exampleFr: "Je voudrais un café, s'il vous plaît.", exampleJa: "コーヒーをいただきたいのですが。" },
+      { fr: "j'aimerais", kana: "ジェムレ", ja: "〜したいのですが", exampleFr: "J'aimerais réserver une table.", exampleJa: "テーブルを予約したいのですが。" },
+      { fr: "pourriez-vous", kana: "プリエ・ヴ", ja: "〜していただけますか", exampleFr: "Pourriez-vous m'aider ?", exampleJa: "手伝っていただけますか?" },
+      { fr: "auriez-vous", kana: "オリエ・ヴ", ja: "〜をお持ちですか(丁寧)", exampleFr: "Auriez-vous l'heure ?", exampleJa: "今何時か分かりますか?" },
+      { fr: "ce serait", kana: "ス・スレ", ja: "〜でしょう(丁寧)", exampleFr: "Ce serait possible ?", exampleJa: "それは可能でしょうか?" },
+      { fr: "volontiers", kana: "ヴォロンティエ", ja: "喜んで", exampleFr: "Un café ? — Volontiers !", exampleJa: "コーヒーは?—喜んで!" },
+      { fr: "un conseil", kana: "アン・コンセイユ", ja: "アドバイス、助言", exampleFr: "Pourrais-tu me donner un conseil ?", exampleJa: "アドバイスをもらえる?" },
+      { fr: "un service", kana: "アン・セルヴィス", ja: "頼み事", exampleFr: "Je peux te demander un service ?", exampleJa: "お願いをしてもいい?" },
+      { fr: "avec plaisir", kana: "アヴェック・プレジール", ja: "喜んで", exampleFr: "Tu viens ? — Avec plaisir !", exampleJa: "来る?—喜んで!" },
+      { fr: "si possible", kana: "スィ・ポシーブル", ja: "できれば", exampleFr: "Si possible, avant midi.", exampleJa: "できれば正午前に。" }
     ]
   }
 };
@@ -1073,6 +1202,162 @@ const GRAMMAR_POINTS = {
       { fr: "Bonne chance pour la suite de ton apprentissage !", ja: "これからの学習も頑張って!" },
       { fr: "C'est génial, continue comme ça !", ja: "すごい、そのまま続けて!" }
     ]
+  },
+  g30: {
+    titleFr: "Les verbes pronominaux", titleJa: "代名動詞",
+    explanationFr: "Les verbes pronominaux se construisent avec un pronoms réfléchi (me, te, se, nous, vous, se) qui renvoie au sujet. On les utilise beaucoup pour la routine quotidienne (se lever, se laver...).",
+    explanationJa: "代名動詞は、主語に対応する再帰代名詞(me, te, se, nous, vous, se)と一緒に使います。日常のルーティン(se lever 起きる、se laver 洗う など)でよく使われます。",
+    patternFr: "[Sujet] + me/te/se/nous/vous/se + verbe",
+    patternJa: "[主語] + me/te/se/nous/vous/se + 動詞",
+    conjugation: [
+      { pronoun: "je", form: "me lève" },
+      { pronoun: "tu", form: "te lèves" },
+      { pronoun: "il / elle", form: "se lève" },
+      { pronoun: "nous", form: "nous levons" },
+      { pronoun: "vous", form: "vous levez" },
+      { pronoun: "ils / elles", form: "se lèvent" }
+    ],
+    examples: [
+      { fr: "Je me lève à sept heures.", ja: "私は7時に起きます。" },
+      { fr: "Elle se couche à minuit.", ja: "彼女は真夜中に寝ます。" },
+      { fr: "Nous nous promenons le dimanche.", ja: "私たちは日曜日に散歩します。" },
+      { fr: "Dépêche-toi, s'il te plaît !", ja: "お願い、急いで!" }
+    ]
+  },
+  g31: {
+    titleFr: "L'imparfait", titleJa: "半過去",
+    explanationFr: "L'imparfait décrit le passé : les habitudes, les descriptions et les actions en cours. On prend le radical de « nous » au présent et on ajoute -ais, -ais, -ait, -ions, -iez, -aient. « être » est irrégulier (ét-).",
+    explanationJa: "半過去は過去の習慣・描写・進行中の動作を表します。現在形の nous の語幹に -ais, -ais, -ait, -ions, -iez, -aient を付けます。être は不規則(ét-)です。",
+    patternFr: "radical + ais / ais / ait / ions / iez / aient",
+    patternJa: "語幹 + ais / ais / ait / ions / iez / aient",
+    conjugation: [
+      { pronoun: "je", form: "étais" },
+      { pronoun: "tu", form: "étais" },
+      { pronoun: "il / elle", form: "était" },
+      { pronoun: "nous", form: "étions" },
+      { pronoun: "vous", form: "étiez" },
+      { pronoun: "ils / elles", form: "étaient" }
+    ],
+    examples: [
+      { fr: "Quand j'étais petit, j'habitais à Lyon.", ja: "小さかった頃、リヨンに住んでいました。" },
+      { fr: "Il faisait beau ce jour-là.", ja: "その日は天気が良かったです。" },
+      { fr: "Nous jouions souvent dehors.", ja: "私たちはよく外で遊んでいました。" },
+      { fr: "Elle avait un petit chien.", ja: "彼女は小さな犬を飼っていました。" }
+    ]
+  },
+  g32: {
+    titleFr: "Imparfait ou passé composé ?", titleJa: "半過去と複合過去の使い分け",
+    explanationFr: "L'imparfait pose le décor (description, habitude, action en cours). Le passé composé raconte une action précise et terminée qui fait avancer l'histoire. Ils se combinent souvent.",
+    explanationJa: "半過去は背景(描写・習慣・進行中の動作)を表します。複合過去は、話を前に進める「一回きりの・完了した動作」を表します。この二つはよく組み合わせて使います。",
+    patternFr: "Imparfait (contexte) + Passé composé (événement)",
+    patternJa: "半過去(背景) + 複合過去(出来事)",
+    items: [
+      { label: "Imparfait", noteFr: "Description, habitude, action en cours", noteJa: "描写・習慣・進行中の動作" },
+      { label: "Passé composé", noteFr: "Action ponctuelle et terminée", noteJa: "一回きりの・完了した動作" },
+      { label: "Ensemble", noteFr: "« Je dormais quand le téléphone a sonné »", noteJa: "「電話が鳴ったとき、私は寝ていた」" }
+    ],
+    examples: [
+      { fr: "Il pleuvait quand je suis sorti.", ja: "私が出かけたとき、雨が降っていました。" },
+      { fr: "Avant je fumais, mais j'ai arrêté.", ja: "以前は喫煙していましたが、やめました。" },
+      { fr: "Nous regardions la télé quand ils sont arrivés.", ja: "彼らが着いたとき、私たちはテレビを見ていました。" },
+      { fr: "Elle lisait pendant que je cuisinais.", ja: "私が料理している間、彼女は読書していました。" }
+    ]
+  },
+  g33: {
+    titleFr: "Les pronoms COD (le, la, les)", titleJa: "直接目的語代名詞",
+    explanationFr: "Le pronoms COD remplace un complément d'objet direct (sans préposition) : le (masculin), la (féminin), les (pluriel), et me, te, nous, vous. Il se place avant le verbe.",
+    explanationJa: "直接目的語代名詞は、前置詞なしの直接目的語を置き換えます:le(男性)、la(女性)、les(複数)、そして me, te, nous, vous。動詞の前に置きます。",
+    patternFr: "Sujet + le / la / les + verbe",
+    patternJa: "主語 + le / la / les + 動詞",
+    items: [
+      { label: "le / la / les", noteFr: "Remplacent un objet direct (chose ou personne)", noteJa: "直接目的語(物・人)を置き換える" },
+      { label: "Place", noteFr: "Avant le verbe conjugué (Je le vois)", noteJa: "活用した動詞の前(Je le vois)" },
+      { label: "Passé composé", noteFr: "Accord avec avoir (Je l'ai vue)", noteJa: "avoir の場合は一致(Je l'ai vue)" }
+    ],
+    examples: [
+      { fr: "Tu vois Marie ? Oui, je la vois.", ja: "マリーが見える?うん、見えるよ。" },
+      { fr: "Ce livre, je le lis ce soir.", ja: "この本、今夜読みます。" },
+      { fr: "Mes amis, je les invite à la fête.", ja: "友達をパーティーに招待します。" },
+      { fr: "Cette chanson, je l'écoute souvent.", ja: "この歌、よく聞きます。" }
+    ]
+  },
+  g34: {
+    titleFr: "Les pronoms COI, y et en", titleJa: "間接目的語代名詞・y・en",
+    explanationFr: "« lui / leur » remplacent « à + une personne ». « y » remplace « à + une chose ou un lieu ». « en » remplace « de + une chose ou une quantité ».",
+    explanationJa: "「lui / leur」は「à + 人」を、「y」は「à + 物・場所」を、「en」は「de + 物・数量」を置き換えます。",
+    patternFr: "Sujet + lui / leur / y / en + verbe",
+    patternJa: "主語 + lui / leur / y / en + 動詞",
+    items: [
+      { label: "lui / leur", noteFr: "à + une personne (Je lui parle)", noteJa: "à + 人(Je lui parle)" },
+      { label: "y", noteFr: "à + une chose ou un lieu (J'y vais)", noteJa: "à + 物・場所(J'y vais)" },
+      { label: "en", noteFr: "de + une chose ou une quantité (J'en ai deux)", noteJa: "de + 物・数量(J'en ai deux)" }
+    ],
+    examples: [
+      { fr: "Je lui téléphone tous les jours.", ja: "私は毎日彼(女)に電話します。" },
+      { fr: "Nous leur offrons des fleurs.", ja: "私たちは彼らに花を贈ります。" },
+      { fr: "J'y vais demain matin.", ja: "私は明日の朝そこへ行きます。" },
+      { fr: "Des amis ? J'en ai beaucoup.", ja: "友達?たくさんいます。" }
+    ]
+  },
+  g35: {
+    titleFr: "Les pronoms relatifs (qui, que, où)", titleJa: "関係代名詞(qui, que, où)",
+    explanationFr: "Les pronoms relatifs relient deux propositions. « qui » est sujet du verbe qui suit ; « que » est complément d'objet direct ; « où » indique le lieu ou le temps.",
+    explanationJa: "関係代名詞は二つの文をつなぎます。「qui」は後続動詞の主語、「que」は直接目的語、「où」は場所や時を表します。",
+    patternFr: "nom + qui / que / où + proposition",
+    patternJa: "名詞 + qui / que / où + 節",
+    items: [
+      { label: "qui", noteFr: "Sujet du verbe (l'ami qui parle)", noteJa: "動詞の主語(l'ami qui parle)" },
+      { label: "que", noteFr: "Objet direct (le livre que je lis)", noteJa: "直接目的語(le livre que je lis)" },
+      { label: "où", noteFr: "Lieu ou temps (la ville où j'habite)", noteJa: "場所・時(la ville où j'habite)" }
+    ],
+    examples: [
+      { fr: "C'est l'ami qui m'aide toujours.", ja: "いつも私を助けてくれる友達です。" },
+      { fr: "Voici le livre que j'aime beaucoup.", ja: "これが私の大好きな本です。" },
+      { fr: "C'est la ville où je suis né.", ja: "これは私が生まれた町です。" },
+      { fr: "Le jour où tu es venu était spécial.", ja: "あなたが来た日は特別でした。" }
+    ]
+  },
+  g36: {
+    titleFr: "Le futur simple", titleJa: "単純未来",
+    explanationFr: "Le futur simple exprime une action future ou une prédiction. On ajoute à l'infinitif les terminaisons -ai, -as, -a, -ons, -ez, -ont (les verbes en -re perdent le e). Certains radicaux sont irréguliers (être → ser-, avoir → aur-, aller → ir-).",
+    explanationJa: "単純未来は未来の動作や予測を表します。動詞の原形に -ai, -as, -a, -ons, -ez, -ont を付けます(-re 動詞は e を取る)。一部の語幹は不規則(être → ser-、avoir → aur-、aller → ir-)。",
+    patternFr: "infinitif + ai / as / a / ons / ez / ont",
+    patternJa: "動詞の原形 + ai / as / a / ons / ez / ont",
+    conjugation: [
+      { pronoun: "je", form: "parlerai" },
+      { pronoun: "tu", form: "parleras" },
+      { pronoun: "il / elle", form: "parlera" },
+      { pronoun: "nous", form: "parlerons" },
+      { pronoun: "vous", form: "parlerez" },
+      { pronoun: "ils / elles", form: "parleront" }
+    ],
+    examples: [
+      { fr: "Demain, je parlerai avec le professeur.", ja: "明日、先生と話すつもりです。" },
+      { fr: "Nous voyagerons en été.", ja: "私たちは夏に旅行するでしょう。" },
+      { fr: "Elle deviendra médecin.", ja: "彼女は医者になるでしょう。" },
+      { fr: "Un jour, tu réussiras.", ja: "いつか、あなたは成功するでしょう。" }
+    ]
+  },
+  g37: {
+    titleFr: "Le conditionnel de politesse", titleJa: "条件法(丁寧表現)",
+    explanationFr: "Le conditionnel sert à faire une demande ou exprimer un souhait poliment. On prend le radical du futur et on ajoute les terminaisons de l'imparfait (-ais, -ais, -ait, -ions, -iez, -aient).",
+    explanationJa: "条件法は、丁寧に依頼したり願望を伝えたりするときに使います。単純未来の語幹に、半過去の語尾(-ais, -ais, -ait, -ions, -iez, -aient)を付けます。",
+    patternFr: "radical du futur + ais / ais / ait / ions / iez / aient",
+    patternJa: "未来の語幹 + ais / ais / ait / ions / iez / aient",
+    conjugation: [
+      { pronoun: "je", form: "aimerais" },
+      { pronoun: "tu", form: "aimerais" },
+      { pronoun: "il / elle", form: "aimerait" },
+      { pronoun: "nous", form: "aimerions" },
+      { pronoun: "vous", form: "aimeriez" },
+      { pronoun: "ils / elles", form: "aimeraient" }
+    ],
+    examples: [
+      { fr: "Je voudrais un café, s'il vous plaît.", ja: "コーヒーをいただきたいのですが。" },
+      { fr: "Pourriez-vous m'aider ?", ja: "手伝っていただけますか?" },
+      { fr: "J'aimerais voyager en France.", ja: "フランスを旅したいのですが。" },
+      { fr: "Ce serait possible avant midi ?", ja: "正午前に可能でしょうか?" }
+    ]
   }
 };
 
@@ -1086,7 +1371,7 @@ const READING_PASSAGES = {
     textJa: "— こんにちは、お名前は?— マリー・デュポンです。— 綴りは?— M-A-R-I-E、D-U-P-O-N-T です。— どうもありがとうございます!あなたのお名前は?— ケンジです。— 名前を一文字ずつ言っていただけますか?— はい、K-E-N-J-I です。",
     questions: [
       { questionFr: "Quel est le nom de famille de Marie ?", questionJa: "マリーの姓(苗字)は?", options: ["Dupont", "Marie", "Kenji", "Durand"], correctAnswer: "Dupont" },
-      { questionFr: "Que signifie « Comment ça s'écrit ? » ?", questionJa: "「Comment ça s'écrit ?」の意味は?", options: ["お元気ですか?", "綴りは?", "何歳ですか?", "どこに住んでいますか?"], correctAnswer: "綴りは?" },
+      { questionFr: "Que signifie « Comment ça s'écrit ? » ?", questionJa: "「Comment ça s'écrit ?」の意味は?", options: ["Comment allez-vous ?", "On demande l'orthographe.", "Quel âge avez-vous ?", "Où habitez-vous ?"], correctAnswer: "On demande l'orthographe.", optionsJa: ["お元気ですか?", "綴りは?", "何歳ですか?", "どこに住んでいますか?"], correctAnswerJa: "綴りは?" },
       { questionFr: "Comment s'écrit le prénom de Kenji ?", questionJa: "ケンジの名前のスペルは?", options: ["K-E-N-G-I", "K-E-N-J-I", "K-A-N-J-I", "K-E-N-Z-I"], correctAnswer: "K-E-N-J-I" }
     ]
   },
@@ -1097,7 +1382,7 @@ const READING_PASSAGES = {
     questions: [
       { questionFr: "Quel est le premier mot que dit Aya ?", questionJa: "アヤが最初に言った言葉は?", options: ["Au revoir", "Bonjour", "Bonsoir", "Pardon"], correctAnswer: "Bonjour" },
       { questionFr: "Comment se sent Paul ?", questionJa: "ポールの気分は?", options: ["fatigué", "ça va bien", "content triste", "malade"], correctAnswer: "ça va bien" },
-      { questionFr: "Que signifie « Enchanté(e) » ?", questionJa: "「Enchanté(e)」の意味は?", options: ["さようなら", "はじめまして", "ありがとう", "すみません"], correctAnswer: "はじめまして" }
+      { questionFr: "Que signifie « Enchanté(e) » ?", questionJa: "「Enchanté(e)」の意味は?", options: ["Au revoir", "Ravi(e) de vous rencontrer", "Merci", "Pardon"], correctAnswer: "Ravi(e) de vous rencontrer", optionsJa: ["さようなら", "はじめまして", "ありがとう", "すみません"], correctAnswerJa: "はじめまして" }
     ]
   },
   r02: {
@@ -1159,7 +1444,7 @@ const READING_PASSAGES = {
     questions: [
       { questionFr: "Qu'est-ce que j'ai commandé ?", questionJa: "私は何を注文した?", options: ["du poisson et du riz", "du pain, du fromage et de l'eau", "de la viande seulement", "des légumes seulement"], correctAnswer: "du pain, du fromage et de l'eau" },
       { questionFr: "Qu'est-ce que mon ami voudrait ?", questionJa: "友達が欲しいものは?", options: ["du pain et du café", "de la viande et des légumes", "du lait et une pomme", "de l'eau et du riz"], correctAnswer: "de la viande et des légumes" },
-      { questionFr: "Que signifie « De rien » ?", questionJa: "「De rien」の意味は?", options: ["ありがとう", "こんにちは", "どういたしまして", "さようなら"], correctAnswer: "どういたしまして" }
+      { questionFr: "Que signifie « De rien » ?", questionJa: "「De rien」の意味は?", options: ["Merci", "Bonjour", "Je vous en prie", "Au revoir"], correctAnswer: "Je vous en prie", optionsJa: ["ありがとう", "こんにちは", "どういたしまして", "さようなら"], correctAnswerJa: "どういたしまして" }
     ]
   },
   r08: {
@@ -1382,6 +1667,86 @@ const READING_PASSAGES = {
       { questionFr: "Que faut-il continuer à faire ?", questionJa: "何を続けるべき?", options: ["arrêter d'étudier", "écouter, lire et pratiquer chaque jour", "étudier seulement une fois par mois", "oublier le français"], correctAnswer: "écouter, lire et pratiquer chaque jour" },
       { questionFr: "Comment le texte décrit-il cet accomplissement ?", questionJa: "この達成をどう表現している?", options: ["sans importance", "un grand accomplissement", "un échec", "normal"], correctAnswer: "un grand accomplissement" }
     ]
+  },
+  r30: {
+    titleFr: "La journée de Julie", titleJa: "ジュリーの一日",
+    textFr: "Le matin, Julie se réveille à six heures et demie. Elle se lève tout de suite et se lave le visage. Ensuite, elle se brosse les dents et s'habille. Elle se dépêche parce que le bus arrive à sept heures et demie. Le soir, elle se repose un peu et se couche vers onze heures.",
+    textJa: "朝、ジュリーは6時半に目を覚まします。すぐに起きて、顔を洗います。それから歯を磨いて服を着ます。バスが7時半に来るので急ぎます。夜は少し休んで、11時ごろに寝ます。",
+    questions: [
+      { questionFr: "À quelle heure Julie se réveille-t-elle ?", questionJa: "ジュリーは何時に目を覚ます?", options: ["six heures", "six heures et demie", "sept heures et demie", "onze heures"], correctAnswer: "six heures et demie" },
+      { questionFr: "Que fait-elle après s'être lavé le visage ?", questionJa: "顔を洗った後、何をする?", options: ["elle se couche", "elle se repose", "elle se brosse les dents et s'habille", "elle se promène"], correctAnswer: "elle se brosse les dents et s'habille" },
+      { questionFr: "Pourquoi se dépêche-t-elle ?", questionJa: "なぜ急ぐ?", options: ["parce qu'elle est fatiguée", "parce que le bus arrive à sept heures et demie", "parce qu'il pleut", "parce qu'elle a faim"], correctAnswer: "parce que le bus arrive à sept heures et demie" }
+    ]
+  },
+  r31: {
+    titleFr: "Quand j'étais petit", titleJa: "私が小さかった頃",
+    textFr: "Quand j'étais petit, j'habitais dans un petit village à la campagne. Il y avait une rivière près de la maison. Chaque été, mes cousins venaient et nous jouions dehors toute la journée. Ma grand-mère préparait des gâteaux délicieux. La vie était simple et tranquille. Je garde de très beaux souvenirs de cette époque.",
+    textJa: "小さかった頃、私は田舎の小さな村に住んでいました。家の近くには川がありました。毎年夏になると、いとこたちが来て、私たちは一日中外で遊んでいました。祖母は美味しいケーキを作ってくれました。生活はシンプルで穏やかでした。私はあの頃のとても素敵な思い出を持っています。",
+    questions: [
+      { questionFr: "Où habitait le narrateur quand il était petit ?", questionJa: "語り手は小さい頃どこに住んでいた?", options: ["dans une grande ville", "dans un petit village à la campagne", "à Paris", "au bord de la mer"], correctAnswer: "dans un petit village à la campagne" },
+      { questionFr: "Que faisait-il chaque été avec ses cousins ?", questionJa: "毎年夏、いとこたちと何をしていた?", options: ["ils étudiaient", "ils jouaient dehors toute la journée", "ils regardaient la télé", "ils voyageaient"], correctAnswer: "ils jouaient dehors toute la journée" },
+      { questionFr: "Comment était la vie à cette époque ?", questionJa: "その頃の生活はどうだった?", options: ["difficile", "simple et tranquille", "stressante", "chère"], correctAnswer: "simple et tranquille" }
+    ]
+  },
+  r32: {
+    titleFr: "Une soirée surprise", titleJa: "あるサプライズの夜",
+    textFr: "Hier soir, il faisait froid et je lisais tranquillement dans le salon. Soudain, le téléphone a sonné. C'était mon ami Paul. Il m'a invité à dîner au restaurant. Pendant que je m'habillais, il a commencé à pleuvoir. Finalement, nous avons passé une très bonne soirée ensemble.",
+    textJa: "昨夜は寒くて、私は居間で静かに読書していました。突然、電話が鳴りました。友達のポールでした。彼は私をレストランの夕食に誘いました。私が服を着ている間に、雨が降り始めました。結局、私たちは一緒にとても良い夜を過ごしました。",
+    questions: [
+      { questionFr: "Que faisait le narrateur quand le téléphone a sonné ?", questionJa: "電話が鳴ったとき語り手は何をしていた?", options: ["il dormait", "il lisait tranquillement", "il cuisinait", "il sortait"], correctAnswer: "il lisait tranquillement" },
+      { questionFr: "Qui a téléphoné ?", questionJa: "誰が電話をかけた?", options: ["sa mère", "son ami Paul", "son frère", "un inconnu"], correctAnswer: "son ami Paul" },
+      { questionFr: "Qu'est-ce qui s'est passé pendant qu'il s'habillait ?", questionJa: "彼が服を着ている間に何が起きた?", options: ["il a commencé à pleuvoir", "le téléphone a sonné encore", "il a fait beau", "il a neigé"], correctAnswer: "il a commencé à pleuvoir" }
+    ]
+  },
+  r33: {
+    titleFr: "Tu le connais ?", titleJa: "それ、知ってる?",
+    textFr: "— Tu connais le nouveau film de ce réalisateur ? — Oui, je le connais ! Je l'ai vu la semaine dernière. — Et tes amis, tu les as invités au cinéma ? — Non, mais je vais les appeler ce soir. — La musique du film est très belle. — Oui, je l'écoute souvent maintenant !",
+    textJa: "— この監督の新しい映画、知ってる?— うん、知ってるよ!先週見たんだ。— で、友達は映画に誘った?— まだだけど、今夜電話するつもり。— その映画の音楽、とても綺麗だね。— うん、最近よく聞いてるよ!",
+    questions: [
+      { questionFr: "A-t-il déjà vu le film ?", questionJa: "彼はもう映画を見た?", options: ["non, jamais", "oui, la semaine dernière", "oui, ce matin", "il ne sait pas"], correctAnswer: "oui, la semaine dernière" },
+      { questionFr: "A-t-il déjà invité ses amis au cinéma ?", questionJa: "彼はもう友達を映画に誘った?", options: ["oui, hier", "non, pas encore", "oui, ce soir", "non, jamais"], correctAnswer: "non, pas encore" },
+      { questionFr: "Que fait-il souvent maintenant ?", questionJa: "彼は最近よく何をする?", options: ["il regarde le film", "il écoute la musique du film", "il appelle le réalisateur", "il va au cinéma"], correctAnswer: "il écoute la musique du film" }
+    ]
+  },
+  r34: {
+    titleFr: "Marie et ses grands-parents", titleJa: "マリーと祖父母",
+    textFr: "Marie pense souvent à ses grands-parents. Chaque dimanche, elle leur téléphone. Ils habitent à Nice, et elle y va pendant les vacances. Sa grand-mère adore les fleurs, alors Marie lui en offre toujours. « J'ai de la chance, dit Marie, parce que je les aime beaucoup. »",
+    textJa: "マリーはよく祖父母のことを考えます。毎週日曜日、彼女は彼らに電話します。彼らはニースに住んでいて、マリーは休暇にそこへ行きます。祖母は花が大好きなので、マリーはいつも花を贈ります。「私は幸運です、二人が大好きだから」とマリーは言います。",
+    questions: [
+      { questionFr: "Quand Marie téléphone-t-elle à ses grands-parents ?", questionJa: "マリーはいつ祖父母に電話する?", options: ["chaque jour", "chaque dimanche", "une fois par an", "jamais"], correctAnswer: "chaque dimanche" },
+      { questionFr: "Où habitent ses grands-parents ?", questionJa: "祖父母はどこに住んでいる?", options: ["à Paris", "à Nice", "à Lyon", "à la campagne"], correctAnswer: "à Nice" },
+      { questionFr: "Qu'est-ce que Marie offre à sa grand-mère ?", questionJa: "マリーは祖母に何を贈る?", options: ["des gâteaux", "des fleurs", "des livres", "du chocolat"], correctAnswer: "des fleurs" }
+    ]
+  },
+  r35: {
+    titleFr: "La maison de mon enfance", titleJa: "子供時代の家",
+    textFr: "Voici la maison où j'ai grandi. C'est un endroit que j'aime beaucoup. La personne qui habite ici maintenant est une vieille dame très gentille. Le jardin, que mon père a planté, est toujours magnifique. C'est le lieu où j'ai passé les plus beaux moments de mon enfance.",
+    textJa: "これが私が育った家です。私が大好きな場所です。今ここに住んでいる人は、とても優しいおばあさんです。父が植えた庭は、今でも見事です。ここは、私が子供時代の最も素敵な時間を過ごした場所です。",
+    questions: [
+      { questionFr: "Qu'est-ce que cette maison représente pour le narrateur ?", questionJa: "この家は語り手にとって何?", options: ["l'endroit où il travaille", "l'endroit où il a grandi", "l'endroit où il étudie", "une maison de vacances"], correctAnswer: "l'endroit où il a grandi" },
+      { questionFr: "Qui habite la maison maintenant ?", questionJa: "今誰がその家に住んでいる?", options: ["son père", "une vieille dame très gentille", "ses cousins", "personne"], correctAnswer: "une vieille dame très gentille" },
+      { questionFr: "Qui a planté le jardin ?", questionJa: "誰が庭を植えた?", options: ["sa mère", "son père", "la vieille dame", "lui-même"], correctAnswer: "son père" }
+    ]
+  },
+  r36: {
+    titleFr: "Mes projets d'avenir", titleJa: "私の将来の計画",
+    textFr: "L'année prochaine, ma vie changera beaucoup. Je finirai mes études et je chercherai un travail. Plus tard, je voyagerai dans plusieurs pays. Un jour, j'espère, je parlerai parfaitement français. Mes amis et moi, nous resterons toujours en contact. L'avenir sera passionnant !",
+    textJa: "来年、私の生活は大きく変わるでしょう。学業を終えて、仕事を探します。もっと後になったら、いくつかの国を旅するでしょう。いつか、フランス語を完璧に話せるようになりたいです。友達と私は、これからもずっと連絡を取り合うでしょう。未来はわくわくするものになるでしょう!",
+    questions: [
+      { questionFr: "Que fera le narrateur l'année prochaine ?", questionJa: "語り手は来年何をする?", options: ["il voyagera dans plusieurs pays", "il finira ses études et cherchera un travail", "il apprendra le japonais", "il restera à la maison"], correctAnswer: "il finira ses études et cherchera un travail" },
+      { questionFr: "Que fera-t-il plus tard ?", questionJa: "彼はもっと後で何をする?", options: ["il voyagera dans plusieurs pays", "il arrêtera d'étudier", "il déménagera", "il ouvrira un restaurant"], correctAnswer: "il voyagera dans plusieurs pays" },
+      { questionFr: "Comment voit-il l'avenir ?", questionJa: "彼は未来をどう見ている?", options: ["difficile", "passionnant", "triste", "ennuyeux"], correctAnswer: "passionnant" }
+    ]
+  },
+  r37: {
+    titleFr: "Une réservation au restaurant", titleJa: "レストランの予約",
+    textFr: "— Bonjour, je voudrais réserver une table pour deux personnes, s'il vous plaît. — Bien sûr. Vous préféreriez ce soir ou demain ? — Ce serait possible ce soir, vers vingt heures ? — Oui. Pourriez-vous me donner votre nom ? — Bien sûr. Et j'aimerais une table près de la fenêtre, si possible. — Avec plaisir !",
+    textJa: "— こんにちは、2名でテーブルを予約したいのですが。— かしこまりました。今夜と明日、どちらがよろしいですか?— 今夜、20時ごろは可能でしょうか?— はい。お名前をいただけますか?— もちろんです。それと、できれば窓際のテーブルがいいのですが。— 喜んで!",
+    questions: [
+      { questionFr: "Que veut faire le client ?", questionJa: "客は何をしたい?", options: ["commander un plat", "réserver une table", "payer l'addition", "annuler une réservation"], correctAnswer: "réserver une table" },
+      { questionFr: "Pour combien de personnes ?", questionJa: "何名分?", options: ["une personne", "deux personnes", "trois personnes", "quatre personnes"], correctAnswer: "deux personnes" },
+      { questionFr: "Quelle table aimerait-il ?", questionJa: "彼はどんなテーブルがいい?", options: ["une table près de la porte", "une table près de la fenêtre", "une table dehors", "une grande table"], correctAnswer: "une table près de la fenêtre" }
+    ]
   }
 };
 
@@ -1448,7 +1813,24 @@ const DICTATION_ITEMS = {
   d28a: { textFr: "Elle est allée au marché.", hintFr: "Écoutez une phrase au passé composé avec être.", hintJa: "「彼女は市場に行きました」" },
   d28b: { textFr: "Ils sont partis en vacances.", hintFr: "Écoutez une phrase sur un départ en vacances.", hintJa: "「彼らは休暇に出発しました」" },
   d29a: { textFr: "Félicitations pour tous tes efforts !", hintFr: "Écoutez une phrase de félicitations.", hintJa: "「あなたの努力全てにおめでとう!」" },
-  d29b: { textFr: "Bonne chance pour la suite !", hintFr: "Écoutez un encouragement final.", hintJa: "「これからも頑張って!」" }
+  d29b: { textFr: "Bonne chance pour la suite !", hintFr: "Écoutez un encouragement final.", hintJa: "「これからも頑張って!」" },
+  // ---- Extension A2 ----
+  d30a: { textFr: "Je me lève à sept heures.", hintFr: "Écoutez une phrase avec un verbe pronominal.", hintJa: "「私は7時に起きます」" },
+  d30b: { textFr: "Elle se couche tard le week-end.", hintFr: "Écoutez une phrase sur l'heure du coucher.", hintJa: "「彼女は週末は遅く寝ます」" },
+  d31a: { textFr: "Quand j'étais petit, j'habitais à Lyon.", hintFr: "Écoutez une phrase à l'imparfait.", hintJa: "「小さかった頃、私はリヨンに住んでいました」" },
+  d31b: { textFr: "Il faisait beau et les oiseaux chantaient.", hintFr: "Écoutez une description au passé (imparfait).", hintJa: "「天気が良く、鳥がさえずっていました」" },
+  d32a: { textFr: "Je dormais quand le téléphone a sonné.", hintFr: "Écoutez une phrase mêlant imparfait et passé composé.", hintJa: "「電話が鳴ったとき、私は寝ていました」" },
+  d32b: { textFr: "Soudain, il a commencé à pleuvoir.", hintFr: "Écoutez une action soudaine au passé composé.", hintJa: "「突然、雨が降り始めました」" },
+  d33a: { textFr: "Ce livre, je le lis ce soir.", hintFr: "Écoutez une phrase avec un pronom COD.", hintJa: "「この本、今夜読みます」" },
+  d33b: { textFr: "Mes amis, je les invite à la fête.", hintFr: "Écoutez une phrase avec le pronom « les ».", hintJa: "「友達をパーティーに招待します」" },
+  d34a: { textFr: "Je lui téléphone tous les jours.", hintFr: "Écoutez une phrase avec le pronom « lui ».", hintJa: "「私は毎日彼(女)に電話します」" },
+  d34b: { textFr: "Des amis ? J'en ai beaucoup.", hintFr: "Écoutez une phrase avec le pronom « en ».", hintJa: "「友達?たくさんいます」" },
+  d35a: { textFr: "C'est l'ami qui m'aide toujours.", hintFr: "Écoutez une phrase avec le pronom relatif « qui ».", hintJa: "「いつも私を助けてくれる友達です」" },
+  d35b: { textFr: "Voici la ville où je suis né.", hintFr: "Écoutez une phrase avec le pronom relatif « où ».", hintJa: "「これが私が生まれた町です」" },
+  d36a: { textFr: "Demain, je parlerai avec le professeur.", hintFr: "Écoutez une phrase au futur simple.", hintJa: "「明日、先生と話すつもりです」" },
+  d36b: { textFr: "Un jour, nous voyagerons ensemble.", hintFr: "Écoutez une phrase sur un projet futur.", hintJa: "「いつか、一緒に旅行するでしょう」" },
+  d37a: { textFr: "Je voudrais un café, s'il vous plaît.", hintFr: "Écoutez une demande polie au conditionnel.", hintJa: "「コーヒーをいただきたいのですが」" },
+  d37b: { textFr: "Pourriez-vous m'aider, s'il vous plaît ?", hintFr: "Écoutez une demande d'aide polie.", hintJa: "「手伝っていただけますか?」" }
 };
 
 // --------------------------------------------------------

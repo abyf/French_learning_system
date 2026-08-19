@@ -54,7 +54,168 @@ function loadProgress() {
   // de reprendre au même endroit la prochaine fois — l'apprenant peut
   // toujours changer de mode depuis l'accueil.
   if (!data._lastMode) data._lastMode = null;
+  // --------------------------------------------------------
+  // Ludification (XP, niveaux, série de jours, objectif quotidien).
+  // Tout est calculé et stocké localement, sans serveur.
+  //   _xp        : total de points d'expérience cumulés
+  //   _streak    : nombre de jours consécutifs avec au moins une activité
+  //   _lastActiveDate : dernière date (YYYY-MM-DD) où une activité a eu lieu
+  //   _dailyDate : jour en cours pour le compteur d'objectif quotidien
+  //   _dailyXp   : XP gagnés pendant _dailyDate (remis à zéro chaque jour)
+  // --------------------------------------------------------
+  if (typeof data._xp !== 'number') data._xp = 0;
+  if (typeof data._streak !== 'number') data._streak = 0;
+  if (!data._lastActiveDate) data._lastActiveDate = null;
+  if (!data._dailyDate) data._dailyDate = null;
+  if (typeof data._dailyXp !== 'number') data._dailyXp = 0;
   return data;
+}
+
+// Objectif d'XP par jour (modeste et atteignable en une courte séance).
+const DAILY_XP_GOAL = 50;
+
+// Points d'expérience attribués par type d'action.
+const XP_REWARDS = {
+  vocabWord: 2,      // un mot marqué « connu »
+  vocabQuiz: 15,     // quiz de vocabulaire terminé
+  grammar: 12,       // leçon de grammaire lue
+  reading: 15,       // questions de lecture validées
+  dictation: 8,      // une phrase de dictée réussie
+  phrase: 8,         // phrase utile apprise
+  speaking: 8,       // phrase pratiquée à l'oral
+  practice: 10       // jeu/exercice de pratique (genre, conjugaison, etc.)
+};
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Nombre de jours entre deux dates YYYY-MM-DD (b - a), en jours entiers.
+function daysBetween(a, b) {
+  const da = new Date(a + 'T00:00:00');
+  const db = new Date(b + 'T00:00:00');
+  return Math.round((db - da) / 86400000);
+}
+
+// Cœur de la ludification : ajoute des XP, met à jour la série de jours
+// et l'objectif quotidien, et renvoie ce qui a changé pour l'animation
+// de récompense (montée de niveau, objectif atteint...).
+function awardXp(amount) {
+  if (!progress || !amount) return null;
+  const today = todayStr();
+  const prevLevel = xpLevel(progress._xp);
+
+  // Série de jours (streak)
+  if (progress._lastActiveDate !== today) {
+    if (progress._lastActiveDate && daysBetween(progress._lastActiveDate, today) === 1) {
+      progress._streak = (progress._streak || 0) + 1; // jour consécutif
+    } else {
+      progress._streak = 1; // première activité, ou série rompue
+    }
+    progress._lastActiveDate = today;
+  }
+
+  // Objectif quotidien (remis à zéro si le jour a changé)
+  if (progress._dailyDate !== today) {
+    progress._dailyDate = today;
+    progress._dailyXp = 0;
+  }
+  const goalWasReached = progress._dailyXp >= DAILY_XP_GOAL;
+  progress._dailyXp += amount;
+  const goalNowReached = progress._dailyXp >= DAILY_XP_GOAL;
+
+  progress._xp += amount;
+  const newLevel = xpLevel(progress._xp);
+  saveProgress(progress);
+
+  return {
+    amount,
+    leveledUp: newLevel > prevLevel,
+    newLevel,
+    goalJustReached: goalNowReached && !goalWasReached,
+    streak: progress._streak
+  };
+}
+
+// Palier de niveau à partir des XP totaux. Progression douce : niveau n
+// requiert 100 * n * (n-1) / 2 XP cumulés (0, 100, 300, 600, 1000...).
+function xpLevel(xp) {
+  let level = 1;
+  while (100 * level * (level + 1) / 2 <= xp) level++;
+  return level;
+}
+
+function xpForLevel(level) {
+  return 100 * (level - 1) * level / 2;
+}
+
+// --------------------------------------------------------
+// Récompenses visuelles : petit badge « +X XP » flottant à chaque
+// gain, et grande célébration (confettis) pour une montée de niveau
+// ou l'objectif quotidien atteint. Aucune dépendance externe.
+// Respecte prefers-reduced-motion (voir CSS).
+// --------------------------------------------------------
+function gainXp(amount) {
+  const result = awardXp(amount);
+  if (!result) return;
+  showXpToast(result.amount);
+  if (result.leveledUp) {
+    showCelebration(`${t('levelUpTitle')} ${result.newLevel}`, t('levelUpSub'));
+  } else if (result.goalJustReached) {
+    showCelebration(t('goalReachedTitle'), t('goalReachedSub'));
+  }
+}
+
+let xpToastTimer = null;
+function showXpToast(amount) {
+  let toast = document.getElementById('xp-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'xp-toast';
+    toast.className = 'xp-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = `+${amount} XP`;
+  // Redémarre l'animation
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  clearTimeout(xpToastTimer);
+  xpToastTimer = setTimeout(() => toast.classList.remove('show'), 1400);
+}
+
+let celebrationTimer = null;
+function showCelebration(title, sub) {
+  let overlay = document.getElementById('celebration');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'celebration';
+    overlay.className = 'celebration';
+    document.body.appendChild(overlay);
+  }
+  const colors = ['#002395', '#ed2939', '#f4b400', '#0f9d58', '#7c3aed', '#0e7490'];
+  const confetti = Array.from({ length: 28 }, (_, i) => {
+    const c = colors[i % colors.length];
+    const left = Math.random() * 100;
+    const delay = (Math.random() * 0.4).toFixed(2);
+    const dur = (1.6 + Math.random() * 1.2).toFixed(2);
+    const rot = Math.floor(Math.random() * 360);
+    return `<span class="confetti-piece" style="left:${left}%;background:${c};animation-delay:${delay}s;animation-duration:${dur}s;transform:rotate(${rot}deg)"></span>`;
+  }).join('');
+  const starSvg = `<svg class="celebration-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.6 6.3L21 9l-5 4.4L17.5 21 12 17.3 6.5 21 8 13.4 3 9l6.4-.7z"/></svg>`;
+  overlay.innerHTML = `
+    <div class="celebration-confetti">${confetti}</div>
+    <div class="celebration-card">
+      <div class="celebration-badge" aria-hidden="true">${starSvg}</div>
+      <h2 class="celebration-title">${title}</h2>
+      <p class="celebration-sub">${sub}</p>
+    </div>`;
+  overlay.classList.add('show');
+  const dismiss = () => { overlay.classList.remove('show'); };
+  overlay.onclick = dismiss;
+  clearTimeout(celebrationTimer);
+  celebrationTimer = setTimeout(dismiss, 2600);
 }
 
 // Indique si une action de la séance guidée vient d'être arrêtée
@@ -909,16 +1070,23 @@ function renderAchievementsPage() {
 
 function renderActivityBrowse(kind) {
   const meta = ACTIVITY_KINDS.find(a => a.kind === kind) || ACTIVITY_KINDS[0];
-  const rows = CURRICULUM.map(stage => {
+  const color = (DAY_KIND_META[kind] && DAY_KIND_META[kind].color) || 'var(--blue)';
+  // Première étape non terminée = étape « en cours » mise en avant.
+  const firstNotDone = CURRICULUM.findIndex(s => !activityStatus(meta.kind, s).done);
+
+  const nodes = CURRICULUM.map((stage, i) => {
     const status = activityStatus(meta.kind, stage);
+    const isCurrent = i === firstNotDone;
+    const side = i % 2 === 0 ? 'node-left' : 'node-right';
+    const stateCls = status.done ? 'node-done' : (isCurrent ? 'node-current' : '');
     return `
-      <button class="activity-row ${status.done ? 'activity-row-done' : ''}" data-nav="${meta.kind}" data-stage="${stage.id}">
-        <span class="activity-row-icon">${status.done ? '✓' : stage.order}</span>
-        <span class="activity-row-text">
-          <span class="activity-row-fr">${stage.titleFr}</span>
-          <span class="activity-row-ja translatable-ja">${stage.titleJa}</span>
+      <button class="journey-node ${side} ${stateCls}" data-nav="${meta.kind}" data-stage="${stage.id}">
+        <span class="journey-dot">${status.done ? '✓' : stage.order}</span>
+        <span class="journey-info">
+          <span class="journey-title">${stage.titleFr}</span>
+          <span class="journey-title-ja translatable-ja">${stage.titleJa}</span>
+          <span class="journey-badge">${status.label}</span>
         </span>
-        <span class="activity-row-badge ${status.done ? 'badge-done' : ''}">${status.label}</span>
       </button>`;
   }).join('');
 
@@ -929,20 +1097,23 @@ function renderActivityBrowse(kind) {
     ${topNav(null)}
     <section class="section-header">
       <h2>${t(meta.titleKey)}</h2>
-      <p class="section-subtitle">${t('browseIntro')}</p>
+      <p class="section-subtitle">${t('journeyIntro')}</p>
     </section>
     ${reviewBannerHtml}
     <button class="secondary-btn plan-back-today" id="back-dashboard-browse">${t('backToDashboard')}</button>
-    <div class="activity-row-list activity-row-list-full">${rows}</div>
+    <div class="journey-map" style="--kind-color:${color}">${nodes}</div>
   `;
 
   bindTopNav();
   document.getElementById('back-dashboard-browse').addEventListener('click', () => navigate('/explore'));
-  document.querySelectorAll('.activity-row[data-nav]').forEach(btn => {
+  document.querySelectorAll('.journey-node[data-nav]').forEach(btn => {
     btn.addEventListener('click', () => { exitSession(); navigate(`/${btn.dataset.nav}/${btn.dataset.stage}`); });
   });
   const reviewBtn = document.getElementById('launch-vocab-review');
   if (reviewBtn) reviewBtn.addEventListener('click', () => navigate('/vocabreview'));
+  // Fait défiler jusqu'à l'étape en cours pour la rendre visible d'emblée
+  const current = document.querySelector('.journey-node.node-current');
+  if (current) current.scrollIntoView({ block: 'center' });
 }
 
 // --------------------------------------------------------
@@ -963,6 +1134,8 @@ function renderDashboard() {
         <div class="progress-bar-track large"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
       </div>
     </header>
+    ${renderMascotGreeting()}
+    ${renderStatsCard()}
     ${showStopMsg ? `<p class="feedback-correct stop-today-msg">${t('stopForTodayMsg')}</p>` : ''}
     ${renderTourCard()}
     ${renderModeChoiceCard()}
@@ -970,6 +1143,112 @@ function renderDashboard() {
 
   bindTopNav();
   bindModeChoiceCard();
+}
+
+// --------------------------------------------------------
+// Mascotte — petit personnage sympathique (dessin SVG, pas d'emoji)
+// avec un béret, qui accueille et encourage l'apprenant. Le message
+// s'adapte à la série de jours / à l'objectif du jour.
+// --------------------------------------------------------
+function mascotSvg() {
+  return `
+  <svg class="mascot-svg mascot-bob" viewBox="0 0 100 100" aria-hidden="true">
+    <ellipse cx="50" cy="92" rx="26" ry="5" fill="rgba(0,0,0,0.08)"/>
+    <!-- corps -->
+    <path d="M22 55a28 28 0 0 1 56 0v10a28 28 0 0 1-56 0z" fill="#002395"/>
+    <ellipse cx="50" cy="64" rx="17" ry="19" fill="#eaf0ff"/>
+    <!-- ailes -->
+    <path d="M22 52c-5 4-6 12-3 18 3-2 5-6 6-11z" fill="#0a2fa8"/>
+    <path d="M78 52c5 4 6 12 3 18-3-2-5-6-6-11z" fill="#0a2fa8"/>
+    <!-- yeux -->
+    <circle cx="41" cy="52" r="9" fill="#fff"/>
+    <circle cx="59" cy="52" r="9" fill="#fff"/>
+    <circle cx="42" cy="53" r="4" fill="#12161d"/>
+    <circle cx="58" cy="53" r="4" fill="#12161d"/>
+    <circle cx="43.5" cy="51.5" r="1.4" fill="#fff"/>
+    <circle cx="59.5" cy="51.5" r="1.4" fill="#fff"/>
+    <!-- bec -->
+    <path d="M50 58l-4 5h8z" fill="#f4b400"/>
+    <!-- béret -->
+    <ellipse cx="50" cy="32" rx="20" ry="8" fill="#ed2939"/>
+    <path d="M30 33a20 8 0 0 0 40 0c0-2-9-5-20-5s-20 3-20 5z" fill="#c81f2e"/>
+    <circle cx="50" cy="24" r="2.5" fill="#c81f2e"/>
+  </svg>`;
+}
+
+function renderMascotGreeting() {
+  const today = todayStr();
+  const dailyXp = (progress._dailyDate === today) ? progress._dailyXp : 0;
+  let shownStreak = progress._streak || 0;
+  if (progress._lastActiveDate && progress._lastActiveDate !== today && daysBetween(progress._lastActiveDate, today) > 1) shownStreak = 0;
+
+  let msg;
+  if (dailyXp >= DAILY_XP_GOAL) msg = t('mascotGoalDone');
+  else if (shownStreak >= 3) msg = t('mascotStreak').replace('{n}', shownStreak);
+  else if (progress._xp > 0) msg = t('mascotResume');
+  else msg = t('mascotWelcome');
+
+  const name = currentUser ? escapeHtml(currentUser.firstname) : '';
+  return `
+    <div class="mascot-greeting">
+      ${mascotSvg()}
+      <div class="mascot-bubble">
+        <p class="mascot-hello">${t('welcomeMsg')} ${name} !</p>
+        <p class="mascot-msg">${msg}</p>
+      </div>
+    </div>`;
+}
+
+// --------------------------------------------------------
+// Carte de statistiques ludiques : série de jours, niveau + barre
+// d'XP, et anneau d'objectif quotidien.
+// --------------------------------------------------------
+function renderStatsCard() {
+  const today = todayStr();
+  const dailyXp = (progress._dailyDate === today) ? progress._dailyXp : 0;
+  const level = xpLevel(progress._xp);
+  const levelStart = xpForLevel(level);
+  const levelEnd = xpForLevel(level + 1);
+  const intoLevel = progress._xp - levelStart;
+  const levelSpan = levelEnd - levelStart;
+  const levelPct = Math.round((intoLevel / levelSpan) * 100);
+  const goalPct = Math.min(100, Math.round((dailyXp / DAILY_XP_GOAL) * 100));
+  // Série affichée : si la dernière activité n'est ni aujourd'hui ni hier,
+  // la série est visuellement rompue (0), sans réécrire les données.
+  let shownStreak = progress._streak || 0;
+  if (progress._lastActiveDate && progress._lastActiveDate !== today) {
+    if (daysBetween(progress._lastActiveDate, today) > 1) shownStreak = 0;
+  } else if (!progress._lastActiveDate) {
+    shownStreak = 0;
+  }
+
+  const ringDeg = goalPct * 3.6;
+  const goalReached = dailyXp >= DAILY_XP_GOAL;
+
+  return `
+    <div class="stats-card">
+      <div class="stat-block stat-streak">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3-1 4-2 6-1 2 0 4 2 4s3-2 2-4c3 2 5 5 5 8a7 7 0 0 1-14 0c0-4 4-6 7-14z"/></svg>
+        <div class="stat-text">
+          <span class="stat-value">${shownStreak}</span>
+          <span class="stat-label">${t('streakLabel')}</span>
+        </div>
+      </div>
+      <div class="stat-block stat-level">
+        <div class="stat-text">
+          <span class="stat-value">${t('levelLabel')} ${level}</span>
+          <span class="stat-label">${progress._xp} XP</span>
+        </div>
+        <div class="xp-bar-track"><div class="xp-bar-fill" style="width:${levelPct}%"></div></div>
+        <span class="xp-bar-caption">${intoLevel} / ${levelSpan} XP</span>
+      </div>
+      <div class="stat-block stat-goal">
+        <div class="goal-ring ${goalReached ? 'goal-done' : ''}" style="--ring:${ringDeg}deg">
+          <span class="goal-ring-value">${dailyXp}</span>
+        </div>
+        <span class="stat-label">${goalReached ? t('goalDoneLabel') : `${t('dailyGoalLabel')} ${DAILY_XP_GOAL}`}</span>
+      </div>
+    </div>`;
 }
 
 // --------------------------------------------------------
@@ -1092,6 +1371,7 @@ function renderVocab(stageId) {
     ${inSession ? '' : topNav(stageId, 'vocab')}
     ${renderSessionBar()}
     ${activityBreadcrumb('vocab', stage, breadcrumbDone, breadcrumbLabel)}
+    ${stageScene(stageId)}
     ${inSession ? `<p class="section-subtitle">${t('vocabNewStepHint')}</p>` : ''}
     <div class="flashcard-wrap">
       <p class="flashcard-counter">${t('cardLabel')} ${flashcardIndex + 1} / ${indexMap.length}</p>
@@ -1142,8 +1422,10 @@ function renderVocab(stageId) {
   document.getElementById('know-btn').addEventListener('click', () => {
     const list = progress[stageId].vocabKnown;
     const pos = list.indexOf(realIndex);
-    if (pos === -1) list.push(realIndex); else list.splice(pos, 1);
+    const newlyKnown = pos === -1;
+    if (newlyKnown) list.push(realIndex); else list.splice(pos, 1);
     saveProgress(progress);
+    if (newlyKnown) gainXp(XP_REWARDS.vocabWord);
     rerender();
   });
   const quizBtn = document.getElementById('quiz-btn');
@@ -1159,6 +1441,7 @@ function renderVocabQuiz(stageId, qIndex, scoreCount) {
     progress[stageId].vocabQuizDone = true;
     saveProgress(progress);
     markStepDoneIfActive('vocab', stageId);
+    gainXp(XP_REWARDS.vocabQuiz);
     app.innerHTML = `
       ${sessionActive() ? '' : topNav(stageId, 'vocab')}
       ${renderSessionBar()}
@@ -1266,6 +1549,7 @@ function renderVocabReview(qIndex, scoreCount, order) {
   }
 
   if (qIndex >= order.length) {
+    if (order.length) gainXp(XP_REWARDS.practice);
     app.innerHTML = `
       ${topNav(null, 'dashboard')}
       <div class="quiz-result">
@@ -1394,9 +1678,11 @@ function renderGrammar(stageId) {
     btn.addEventListener('click', () => speakFrench(decodeURIComponent(btn.dataset.speak)));
   });
   document.getElementById('mark-viewed-btn').addEventListener('click', () => {
+    const wasViewed = progress[stageId].grammarViewed;
     progress[stageId].grammarViewed = true;
     saveProgress(progress);
     markStepDoneIfActive('grammar', stageId);
+    if (!wasViewed) gainXp(XP_REWARDS.grammar);
     renderGrammar(stageId);
   });
   const genderBtn = document.getElementById('launch-gender-game');
@@ -1415,6 +1701,7 @@ function renderGenderGame(qIndex, scoreCount, order) {
   if (!order) order = shuffleArray(GENDER_ITEMS.map((_, i) => i));
 
   if (qIndex >= order.length) {
+    if (order.length) gainXp(XP_REWARDS.practice);
     app.innerHTML = `
       ${topNav('s04', 'grammar')}
       <div class="quiz-result">
@@ -1484,6 +1771,7 @@ function renderConjugationDrill(grammarId, qIndex, scoreCount, order) {
 
   if (qIndex >= order.length) {
     markStepDoneIfActive('grammar', stage.id);
+    if (order.length) gainXp(XP_REWARDS.practice);
     app.innerHTML = `
       ${sessionActive() ? '' : topNav(stage.id, 'grammar')}
       ${renderSessionBar()}
@@ -1557,6 +1845,7 @@ function renderSentenceBuilder(grammarId, exIndex) {
 
   if (exIndex >= g.examples.length) {
     markStepDoneIfActive('grammar', stage.id);
+    if (exIndex > 0) gainXp(XP_REWARDS.practice);
     app.innerHTML = `
       ${sessionActive() ? '' : topNav(stage.id, 'grammar')}
       ${renderSessionBar()}
@@ -1572,9 +1861,12 @@ function renderSentenceBuilder(grammarId, exIndex) {
   }
 
   const sentence = g.examples[exIndex].fr;
-  const cleanSentence = sentence.replace(/[.?!]+$/, '');
+  // On retire la ponctuation finale ET l'espace qui la précède
+  // (typographie française : « ... ? »), pour ne pas créer de tuile
+  // vide. Les mots sont découpés sur les espaces multiples.
+  const cleanSentence = sentence.replace(/\s*[.?!]+$/, '');
   const punctuation = sentence.slice(cleanSentence.length);
-  const words = cleanSentence.split(' ');
+  const words = cleanSentence.split(/\s+/).filter(Boolean);
   sentenceBuilderPicked = [];
   const shuffledWords = shuffleArray(words.map((w, i) => ({ w, i })));
 
@@ -1655,6 +1947,16 @@ function bindReadingModeTabs(stageId) {
   });
 }
 
+// Options et bonne réponse localisées : certaines questions « Que
+// signifie... ? » ont un jeu d'options en français et un en japonais,
+// pour rester cohérent avec la langue de l'interface choisie.
+function questionOptions(q) {
+  return (currentUiLang === 'ja' && q.optionsJa) ? q.optionsJa : q.options;
+}
+function questionCorrect(q) {
+  return (currentUiLang === 'ja' && q.correctAnswerJa) ? q.correctAnswerJa : q.correctAnswer;
+}
+
 function renderReading(stageId) {
   lastReadingStageId = stageId;
   const stage = CURRICULUM.find(s => s.id === stageId);
@@ -1669,6 +1971,7 @@ function renderReading(stageId) {
     ${activityBreadcrumb('reading', stage, !!priorScore, priorScore ? `${t('score')}: ${priorScore.correct} / ${priorScore.total}` : null)}
     ${readingModeTabsHtml()}
     <div class="reading-card">
+      ${stageScene(stageId)}
       <h3 class="content-title">${passage.titleFr} <span class="content-title-ja translatable-ja">${passage.titleJa}</span></h3>
       ${readingMode === 'listen' ? `<p class="section-subtitle">${t('listeningInstructions')}</p>` : ''}
       <div class="reading-text-controls">
@@ -1684,7 +1987,7 @@ function renderReading(stageId) {
           <div class="reading-question">
             <p class="question-text">${i + 1}. ${loc(q.questionFr, q.questionJa)}</p>
             <div class="quiz-options">
-              ${q.options.map(opt => `<button class="quiz-option" data-qindex="${i}" data-value="${encodeURIComponent(opt)}">${opt}</button>`).join('')}
+              ${questionOptions(q).map(opt => `<button class="quiz-option" data-qindex="${i}" data-value="${encodeURIComponent(opt)}">${opt}</button>`).join('')}
             </div>
           </div>`).join('')}
       </div>
@@ -1721,17 +2024,20 @@ function renderReading(stageId) {
     let correctCount = 0;
     passage.questions.forEach((q, i) => {
       const group = document.querySelectorAll(`.reading-question:nth-child(${i + 1}) .quiz-option`);
-      const isCorrect = readingAnswers[i] === q.correctAnswer;
+      const correct = questionCorrect(q);
+      const isCorrect = readingAnswers[i] === correct;
       if (isCorrect) correctCount++;
       group.forEach(b => {
         const val = decodeURIComponent(b.dataset.value);
-        if (val === q.correctAnswer) b.classList.add('option-correct');
+        if (val === correct) b.classList.add('option-correct');
         else if (val === readingAnswers[i]) b.classList.add('option-incorrect');
       });
     });
+    const firstReadingAttempt = !progress[stageId].readingScore;
     progress[stageId].readingScore = { correct: correctCount, total: passage.questions.length };
     saveProgress(progress);
     markStepDoneIfActive('reading', stageId);
+    if (firstReadingAttempt) gainXp(XP_REWARDS.reading);
     const result = document.getElementById('reading-result');
     result.textContent = `${t('score')}: ${correctCount} / ${passage.questions.length}`;
     result.className = 'quiz-feedback ' + (correctCount === passage.questions.length ? 'feedback-correct' : 'feedback-incorrect');
@@ -1828,6 +2134,7 @@ function renderDictation(stageId) {
       const card = document.querySelector(`[data-id="${item.id}"]`);
       if (isCorrect) {
         feedback.innerHTML = `<span class="feedback-correct">${t('perfect')}</span>`;
+        const wasDone = !!progress[stageId].dictation[item.id];
         progress[stageId].dictation[item.id] = true;
         saveProgress(progress);
         card.classList.add('dictation-done');
@@ -1835,6 +2142,7 @@ function renderDictation(stageId) {
         if (!hint.querySelector('.done-check')) {
           hint.innerHTML = `<span class="done-check">✓ ${t('statusDone')}</span> — ${t('hintLabel')}: ${loc(item.hintFr, item.hintJa)}`;
         }
+        if (!wasDone) gainXp(XP_REWARDS.dictation);
         if (stage.dictationIds.every(id => progress[stageId].dictation[id])) markStepDoneIfActive('dictation', stageId);
         refreshSessionBar();
       } else {
@@ -1912,7 +2220,9 @@ function renderDailyPhrase(phraseIndex) {
   bindSessionBar();
   document.getElementById('daily-phrase-listen').addEventListener('click', () => speakFrench(phrase.fr));
   document.getElementById('daily-phrase-done').addEventListener('click', () => {
+    const wasDone = isStepDone(day, sessionState.taskIndex);
     markStepDoneIfActive('phrase', phraseIndex);
+    if (!wasDone) gainXp(XP_REWARDS.phrase);
     renderDailyPhrase(phraseIndex);
   });
 }
@@ -2055,7 +2365,9 @@ function renderDailySpeakingTask(phraseIndex) {
   document.getElementById('speaking-listen').addEventListener('click', () => speakFrench(prompt.fr));
   setupRecordingControls();
   document.getElementById('daily-speaking-done').addEventListener('click', () => {
+    const wasDone = isStepDone(day, sessionState.taskIndex);
     markStepDoneIfActive('speaking', phraseIndex);
+    if (!wasDone) gainXp(XP_REWARDS.speaking);
     renderDailySpeakingTask(phraseIndex);
   });
 }

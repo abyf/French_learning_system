@@ -11,12 +11,13 @@
 // cache propre (le navigateur détecte que ce fichier a changé et
 // réinstalle le service worker automatiquement).
 // ============================================================
-const CACHE_VERSION = 'lff-v10';
+const CACHE_VERSION = 'lff-v15';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './content.js',
+  './illustrations.js',
   './daily-plan.js',
   './i18n.js',
   './auth.js',
