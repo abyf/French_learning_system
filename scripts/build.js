@@ -25,7 +25,8 @@ const FILES = [
   'manifest.json',
   'icons/icon-192.svg',
   'icons/icon-512.svg',
-  'icons/nipponmboa-logo.svg'
+  'icons/nipponmboa-logo.svg',
+  'icons/bg-scene.svg'
 ];
 
 // Nettoyer dist/ si existant

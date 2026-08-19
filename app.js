@@ -408,9 +408,11 @@ function renderUserBar() {
     return;
   }
   bar.innerHTML = `
+    <button class="header-home-btn" id="header-home-btn">${t('navDashboard')}</button>
     <span class="welcome-msg">${t('welcomeMsg')} ${escapeHtml(currentUser.firstname)} !</span>
     <span class="user-alias-badge">@${escapeHtml(currentUser.alias)}</span>
     <button class="logout-btn" id="logout-btn">${t('logoutButton')}</button>`;
+  document.getElementById('header-home-btn').addEventListener('click', () => { exitSession(); navigate('/dashboard'); });
   document.getElementById('logout-btn').addEventListener('click', logout);
 }
 
@@ -588,18 +590,16 @@ function renderRoute(route) {
 // --------------------------------------------------------
 function topNav(activeStageId, activeView) {
   const cls = (view) => `nav-btn${activeView === view ? ' nav-btn-active' : ''}`;
+  // « Accueil » vit désormais dans l'en-tête du site (à côté de la langue).
+  // La barre interne ne sert qu'à changer de section AU SEIN d'une étape
+  // (exploration libre) ; sur les autres pages, elle n'apparaît pas.
+  if (!activeStageId) return '';
   return `
     <nav class="top-nav">
-      <button class="${cls('dashboard')}" data-nav="dashboard">${t('navDashboard')}</button>
-      <button class="${cls('plan')}" data-nav="plan">${t('navPlan')}</button>
-      <button class="${cls('phrases')}" data-nav="phrases">${t('phrasesNavLabel')}</button>
-      <button class="${cls('speaking')}" data-nav="speaking">${t('speakingNavLabel')}</button>
-      ${activeStageId ? `
-        <button class="${cls('vocab')}" data-nav="vocab" data-stage="${activeStageId}">${t('navVocabulary')}</button>
-        <button class="${cls('grammar')}" data-nav="grammar" data-stage="${activeStageId}">${t('navGrammar')}</button>
-        <button class="${cls('reading')}" data-nav="reading" data-stage="${activeStageId}">${t('navReading')}</button>
-        <button class="${cls('dictation')}" data-nav="dictation" data-stage="${activeStageId}">${t('navDictation')}</button>
-      ` : ''}
+      <button class="${cls('vocab')}" data-nav="vocab" data-stage="${activeStageId}">${t('navVocabulary')}</button>
+      <button class="${cls('grammar')}" data-nav="grammar" data-stage="${activeStageId}">${t('navGrammar')}</button>
+      <button class="${cls('reading')}" data-nav="reading" data-stage="${activeStageId}">${t('navReading')}</button>
+      <button class="${cls('dictation')}" data-nav="dictation" data-stage="${activeStageId}">${t('navDictation')}</button>
     </nav>`;
 }
 
@@ -633,11 +633,9 @@ function bindTopNav() {
       exitSession(); // navigation via le menu = exploration libre, on quitte la séance guidée
       const view = btn.dataset.nav;
       const stage = btn.dataset.stage;
-      if (view === 'dashboard' || view === 'plan' || view === 'phrases' || view === 'speaking') {
-        navigate(`/${view}`);
-      } else {
-        navigate(`/${view}/${stage}`);
-      }
+      // Les boutons liés à une étape portent data-stage ; les autres
+      // (Accueil, Programme) mènent directement à leur vue.
+      navigate(stage ? `/${view}/${stage}` : `/${view}`);
     });
   });
 }
@@ -896,6 +894,7 @@ function renderModeChoiceCard() {
           <h3>${t('modeGuidedTitle')}</h3>
           <p>${t('modeGuidedDesc')}</p>
           <button class="primary-btn mode-choice-btn" id="choose-guided-btn">${t('modeGuidedButton')}</button>
+          <button class="link-btn mode-program-overview" id="view-program-overview">${t('programOverviewLink')}</button>
         </div>
         <div class="mode-choice-option">
           ${lastMode === 'free' ? `<span class="resume-badge">${t('resumeBadge')}</span>` : ''}
@@ -924,6 +923,8 @@ function enterGuidedMode() {
 function bindModeChoiceCard() {
   const guidedBtn = document.getElementById('choose-guided-btn');
   if (guidedBtn) guidedBtn.addEventListener('click', enterGuidedMode);
+  const overviewBtn = document.getElementById('view-program-overview');
+  if (overviewBtn) overviewBtn.addEventListener('click', () => navigate('/plan'));
   const freeBtn = document.getElementById('choose-free-btn');
   if (freeBtn) freeBtn.addEventListener('click', () => {
     progress._lastMode = 'free';
@@ -1044,12 +1045,12 @@ function renderExploreHome() {
       <p class="section-subtitle">${t('exploreIntro')}</p>
     </section>
     ${exploreCardsHtml()}
-    <button class="secondary-btn" id="explore-view-plan">${t('viewFullPlan')}</button>
+    <button class="secondary-btn" id="explore-back-home">${t('backToDashboard')}</button>
     <button class="secondary-btn" id="explore-view-achievements">${t('achievementsLinkLabel')}</button>
   `;
   bindTopNav();
   bindExploreCardsClicks();
-  document.getElementById('explore-view-plan').addEventListener('click', () => navigate('/plan'));
+  document.getElementById('explore-back-home').addEventListener('click', () => navigate('/dashboard'));
   document.getElementById('explore-view-achievements').addEventListener('click', () => navigate('/achievements'));
 }
 
@@ -2162,6 +2163,7 @@ function renderPhrasebook() {
       <h2>${t('phrasesTitle')}</h2>
       <p class="section-subtitle">${t('phrasesIntro')}</p>
     </section>
+    <button class="secondary-btn" id="phrases-back-explore">${t('backToExplore')}</button>
     <div class="phrasebook-list">
       ${PHRASEBOOK.map(cat => `
         <div class="phrase-category">
@@ -2181,6 +2183,7 @@ function renderPhrasebook() {
     </div>`;
 
   bindTopNav();
+  document.getElementById('phrases-back-explore').addEventListener('click', () => navigate('/explore'));
   document.querySelectorAll('.phrase-listen[data-speak]').forEach(btn => {
     btn.addEventListener('click', () => speakFrench(decodeURIComponent(btn.dataset.speak)));
   });
@@ -2296,6 +2299,7 @@ function renderSpeaking() {
       <h2>${t('speakingTitle')}</h2>
       <p class="section-subtitle">${t('speakingIntro')}</p>
     </section>
+    <button class="secondary-btn" id="speaking-back-explore">${t('backToExplore')}</button>
     <div class="flashcard-wrap">
       <p class="flashcard-counter">${speakingIndex + 1} / ${pool.length}</p>
       <div class="flashcard">
@@ -2319,6 +2323,7 @@ function renderSpeaking() {
     </div>`;
 
   bindTopNav();
+  document.getElementById('speaking-back-explore').addEventListener('click', () => navigate('/explore'));
   document.getElementById('speaking-listen').addEventListener('click', () => speakFrench(prompt.fr));
   document.getElementById('speaking-prev').addEventListener('click', () => { speakingIndex = Math.max(0, speakingIndex - 1); renderSpeaking(); });
   document.getElementById('speaking-next').addEventListener('click', () => { speakingIndex = Math.min(pool.length - 1, speakingIndex + 1); renderSpeaking(); });

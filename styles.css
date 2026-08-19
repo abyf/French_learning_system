@@ -26,10 +26,18 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", sans-serif;
-  background: var(--bg);
   color: var(--text);
   line-height: 1.65;
   font-size: 16px;
+  /* Fond thématique France + Japon : silhouette discrète, fixée en bas
+     de l'écran, derrière un fond clair. Les cartes de contenu étant
+     opaques, la lisibilité reste intacte. */
+  background-color: var(--bg);
+  background-image: url('icons/bg-scene.svg');
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-attachment: fixed;
+  background-size: min(1400px, 135%) auto;
 }
 
 /* Header */
@@ -832,6 +840,10 @@ input:focus-visible {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  /* Bande translucide pour rester lisible par-dessus le fond thématique */
+  background: rgba(244, 246, 251, 0.85);
+  backdrop-filter: blur(2px);
+  border-top: 1px solid #e5e9f5;
 }
 
 .site-footer-logo {
@@ -1325,6 +1337,28 @@ input:focus-visible {
 
 .logout-btn:hover {
   background: rgba(255, 255, 255, 0.15);
+}
+
+/* Bouton « Accueil » dans l'en-tête du site (à côté de la langue) */
+.header-home-btn {
+  padding: 5px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.header-home-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Lien discret « Aperçu du programme guidé » sous le bouton guidé */
+.mode-program-overview {
+  margin-top: 8px;
+  align-self: flex-start;
 }
 
 /* Auth screen (login / register) */
