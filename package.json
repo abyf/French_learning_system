@@ -8,6 +8,15 @@
     "build": "node scripts/build.js",
     "preview": "node scripts/serve.js dist 3000"
   },
-  "keywords": ["french", "japanese", "learning", "offline", "pwa"],
-  "license": "MIT"
+  "keywords": [
+    "french",
+    "japanese",
+    "learning",
+    "offline",
+    "pwa"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "supabase": "^2.115.0"
+  }
 }

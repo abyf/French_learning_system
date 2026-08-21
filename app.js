@@ -17,15 +17,21 @@ function escapeHtml(str) {
 }
 
 function progressStorageKey() {
-  return `lff-progress-${currentUser.alias}`;
+  const key = (currentUser && (currentUser.id || currentUser.alias)) || 'anon';
+  return `lff-progress-${key}`;
 }
+
+// Accès (abonnement) actif pour le cours courant. En mode local (sans
+// plateforme configurée), toujours true (pas de paywall).
+let subscriptionActive = false;
 
 // --------------------------------------------------------
 // Progression (localStorage, isolée par utilisateur)
 // --------------------------------------------------------
-function loadProgress() {
-  const raw = localStorage.getItem(progressStorageKey());
-  const data = raw ? JSON.parse(raw) : {};
+// Applique tous les champs par défaut à un objet de progression brut
+// (utilisé aussi bien pour le localStorage que pour les données serveur).
+function normalizeProgress(data) {
+  data = data || {};
   CURRICULUM.forEach(stage => {
     if (!data[stage.id]) {
       data[stage.id] = {
@@ -36,39 +42,59 @@ function loadProgress() {
         dictation: {} // { [dictationId]: true }
       };
     }
-    // Dernière carte affichée dans le défilé de vocabulaire — pour ne pas
-    // repartir de la carte 1 chaque fois que la page est rechargée.
     if (data[stage.id].vocabLastIndex === undefined) data[stage.id].vocabLastIndex = 0;
   });
-  // Journal de révision globale (SRS léger) : dernière date de révision par mot,
-  // indépendant de l'étape. Clé = "stageId:wordIndex".
   if (!data._srs) data._srs = {};
-  // Réussites (badges) déjà débloquées
   if (!data._achievements) data._achievements = [];
-  // Avancement du programme guidé, au niveau de chaque étape (step) de
-  // chaque jour — indépendant des indicateurs par étape ci-dessus, pour
-  // que les jours de révision/bilan exigent une vraie action à refaire.
-  // Clé = numéro de jour, valeur = { [indexDuStep]: true }.
   if (!data._dayDone) data._dayDone = {};
-  // Dernier mode d'apprentissage choisi ('guided' | 'free'), pour proposer
-  // de reprendre au même endroit la prochaine fois — l'apprenant peut
-  // toujours changer de mode depuis l'accueil.
   if (!data._lastMode) data._lastMode = null;
-  // --------------------------------------------------------
-  // Ludification (XP, niveaux, série de jours, objectif quotidien).
-  // Tout est calculé et stocké localement, sans serveur.
-  //   _xp        : total de points d'expérience cumulés
-  //   _streak    : nombre de jours consécutifs avec au moins une activité
-  //   _lastActiveDate : dernière date (YYYY-MM-DD) où une activité a eu lieu
-  //   _dailyDate : jour en cours pour le compteur d'objectif quotidien
-  //   _dailyXp   : XP gagnés pendant _dailyDate (remis à zéro chaque jour)
-  // --------------------------------------------------------
   if (typeof data._xp !== 'number') data._xp = 0;
   if (typeof data._streak !== 'number') data._streak = 0;
   if (!data._lastActiveDate) data._lastActiveDate = null;
   if (!data._dailyDate) data._dailyDate = null;
   if (typeof data._dailyXp !== 'number') data._dailyXp = 0;
   return data;
+}
+
+function loadProgressLocal() {
+  const raw = localStorage.getItem(progressStorageKey());
+  return normalizeProgress(raw ? JSON.parse(raw) : {});
+}
+
+// Retrouve une progression locale héritée (mode local ou ancienne version)
+// pour l'importer une seule fois lors de la première connexion serveur.
+function findLegacyLocalProgress() {
+  try {
+    const currentKey = progressStorageKey();
+    const others = Object.keys(localStorage).filter(k => k.startsWith('lff-progress-') && k !== currentKey);
+    if (others.length === 1) {
+      const raw = localStorage.getItem(others[0]);
+      if (raw) return JSON.parse(raw);
+    }
+  } catch (e) {}
+  return null;
+}
+
+// Charge la progression : serveur (source de vérité) en mode plateforme,
+// sinon localStorage. Met à jour le cache local dans tous les cas.
+async function hydrateProgress() {
+  if (platformConfigured() && currentUser) {
+    let serverData = null;
+    try { serverData = await platformLoadProgress(PLATFORM_CONFIG.courseId); } catch (e) {}
+    if (serverData && Object.keys(serverData).length > 0) {
+      progress = normalizeProgress(serverData);
+    } else {
+      // Rien côté serveur : importer une progression locale existante si
+      // possible (cache du compte, sinon progression héritée unique).
+      const cachedRaw = localStorage.getItem(progressStorageKey());
+      const seed = cachedRaw ? JSON.parse(cachedRaw) : findLegacyLocalProgress();
+      progress = normalizeProgress(seed || {});
+      saveProgress(progress); // initialise le serveur
+    }
+    try { localStorage.setItem(progressStorageKey(), JSON.stringify(progress)); } catch (e) {}
+  } else {
+    progress = loadProgressLocal();
+  }
 }
 
 // Objectif d'XP par jour (modeste et atteignable en une courte séance).
@@ -223,8 +249,17 @@ function showCelebration(title, sub) {
 // amical une seule fois au retour sur l'accueil.
 let justStoppedForToday = false;
 
-function saveProgress(progress) {
-  localStorage.setItem(progressStorageKey(), JSON.stringify(progress));
+let _progressPushTimer = null;
+function saveProgress(p) {
+  // Cache local immédiat (fonctionne hors-ligne / PWA).
+  try { localStorage.setItem(progressStorageKey(), JSON.stringify(p)); } catch (e) {}
+  // Synchronisation serveur en arrière-plan (débounce pour éviter le spam).
+  if (platformConfigured() && currentUser) {
+    clearTimeout(_progressPushTimer);
+    _progressPushTimer = setTimeout(() => {
+      platformSaveProgress(PLATFORM_CONFIG.courseId, p).catch(() => {});
+    }, 800);
+  }
 }
 
 let progress = null; // chargé après connexion (voir completeLogin)
@@ -393,7 +428,11 @@ const AUTH_ERROR_KEYS = {
   EMAIL_TAKEN: 'errorEmailTaken',
   PASSWORD_MISMATCH: 'errorPasswordMismatch',
   NOT_FOUND: 'errorLoginFailed',
-  BAD_PASSWORD: 'errorLoginFailed'
+  BAD_PASSWORD: 'errorLoginFailed',
+  BAD_CREDENTIALS: 'errorLoginFailed',
+  EMAIL_NOT_CONFIRMED: 'errorEmailNotConfirmed',
+  PLATFORM_NOT_CONFIGURED: 'errorGeneric',
+  AUTH_ERROR: 'errorGeneric'
 };
 
 function authErrorMessage(code) {
@@ -416,23 +455,75 @@ function renderUserBar() {
   document.getElementById('logout-btn').addEventListener('click', logout);
 }
 
-function completeLogin(user) {
-  currentUser = { firstname: user.firstname, email: user.email, alias: user.alias };
-  saveSession(user.alias);
-  progress = loadProgress();
+async function completeLogin(user) {
+  currentUser = { firstname: user.firstname, email: user.email, alias: user.alias, id: user.id };
+  if (!platformConfigured()) saveSession(user.alias);
+  await hydrateProgress();
+  subscriptionActive = platformConfigured()
+    ? await platformHasAccess(PLATFORM_CONFIG.courseId)
+    : true;
   renderUserBar();
-  window.location.hash = '/dashboard';
+  window.location.hash = subscriptionActive ? '/dashboard' : '/subscribe';
   render();
 }
 
-function logout() {
-  clearSession();
+async function logout() {
+  if (platformConfigured()) {
+    try { await platformSignOut(); } catch (e) {}
+  } else {
+    clearSession();
+  }
   currentUser = null;
   progress = null;
+  subscriptionActive = false;
   authMode = 'login';
   window.location.hash = '';
   renderUserBar();
   render();
+}
+
+// --------------------------------------------------------
+// Écran d'abonnement (paywall) — affiché quand l'utilisateur est
+// connecté mais n'a pas d'accès actif. Chaque plan ouvre le paiement
+// Lemon Squeezy (nouvel onglet), avec e-mail + user_id pré-remplis.
+// --------------------------------------------------------
+function renderSubscribe() {
+  const planLabel = {
+    monthly: t('planMonthly'),
+    annual: t('planAnnual'),
+    lifetime: t('planLifetime')
+  };
+  const cards = (PLATFORM_CONFIG.plans || []).map(p => {
+    const url = platformCheckoutUrl(currentUser, p.variantId);
+    return `<a class="primary-btn subscribe-plan" href="${url}" target="_blank" rel="noopener noreferrer">${planLabel[p.key] || p.key}</a>`;
+  }).join('');
+
+  app.innerHTML = `
+    <section class="section-header">
+      <h2>${t('subscribeTitle')}</h2>
+      <p class="section-subtitle">${t('subscribeIntro')}</p>
+    </section>
+    <div class="subscribe-card">
+      <div class="subscribe-plans">${cards}</div>
+      <button class="secondary-btn" id="already-paid-btn">${t('alreadyPaid')}</button>
+      <p id="subscribe-msg" class="section-subtitle"></p>
+      <button class="link-btn" id="subscribe-logout">${t('logoutButton')}</button>
+    </div>`;
+
+  renderUserBar();
+  document.getElementById('already-paid-btn').addEventListener('click', async () => {
+    const msg = document.getElementById('subscribe-msg');
+    msg.textContent = t('checkingAccess');
+    const ok = await platformHasAccess(PLATFORM_CONFIG.courseId);
+    if (ok) {
+      subscriptionActive = true;
+      navigate('/dashboard');
+      render();
+    } else {
+      msg.textContent = t('accessNotFound');
+    }
+  });
+  document.getElementById('subscribe-logout').addEventListener('click', logout);
 }
 
 function renderAuthScreen(mode) {
@@ -462,6 +553,20 @@ function renderAuthScreen(mode) {
 }
 
 function renderLoginFormHtml() {
+  if (platformConfigured()) {
+    return `
+      <form id="login-form" class="auth-form" novalidate>
+        <label>${t('emailLabel')}
+          <input type="email" id="login-email" autocomplete="email" required />
+        </label>
+        <label>${t('passwordLabel')}
+          <input type="password" id="login-password" autocomplete="current-password" required minlength="6" />
+        </label>
+        <p class="auth-error" id="auth-error" role="alert"></p>
+        <button type="submit" class="primary-btn auth-submit">${t('loginButton')}</button>
+        <button type="button" class="link-btn" id="forgot-password-btn">${t('forgotPassword')}</button>
+      </form>`;
+  }
   return `
     <form id="login-form" class="auth-form" novalidate>
       <label>${t('aliasLabel')}
@@ -476,6 +581,25 @@ function renderLoginFormHtml() {
 }
 
 function renderRegisterFormHtml() {
+  if (platformConfigured()) {
+    return `
+      <form id="register-form" class="auth-form" novalidate>
+        <label>${t('firstnameLabel')}
+          <input type="text" id="reg-firstname" required />
+        </label>
+        <label>${t('emailLabel')}
+          <input type="email" id="reg-email" autocomplete="email" required />
+        </label>
+        <label>${t('passwordLabel')}
+          <input type="password" id="reg-password" autocomplete="new-password" required minlength="6" />
+        </label>
+        <label>${t('confirmPasswordLabel')}
+          <input type="password" id="reg-confirm" autocomplete="new-password" required minlength="6" />
+        </label>
+        <p class="auth-error" id="auth-error" role="alert"></p>
+        <button type="submit" class="primary-btn auth-submit">${t('registerButton')}</button>
+      </form>`;
+  }
   return `
     <form id="register-form" class="auth-form" novalidate>
       <label>${t('firstnameLabel')}
@@ -501,37 +625,80 @@ function renderRegisterFormHtml() {
 function bindLoginForm() {
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const alias = document.getElementById('login-alias').value;
-    const password = document.getElementById('login-password').value;
     const errorEl = document.getElementById('auth-error');
+    errorEl.className = 'auth-error';
     errorEl.textContent = '';
     try {
-      const user = await loginUser(alias, password);
-      completeLogin(user);
+      if (platformConfigured()) {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        await platformSignIn({ email, password });
+        const u = await platformCurrentUser();
+        if (!u) throw new Error('EMAIL_NOT_CONFIRMED');
+        await completeLogin({ firstname: u.displayName, email: u.email, alias: u.displayName, id: u.id });
+      } else {
+        const alias = document.getElementById('login-alias').value;
+        const password = document.getElementById('login-password').value;
+        const user = await loginUser(alias, password);
+        await completeLogin(user);
+      }
     } catch (err) {
       errorEl.textContent = authErrorMessage(err.message);
     }
   });
+
+  const forgot = document.getElementById('forgot-password-btn');
+  if (forgot) {
+    forgot.addEventListener('click', async () => {
+      const errorEl = document.getElementById('auth-error');
+      const emailEl = document.getElementById('login-email');
+      const email = emailEl ? emailEl.value : '';
+      if (!email) { errorEl.className = 'auth-error'; errorEl.textContent = t('errorEmailInvalid'); return; }
+      try {
+        await platformResetPassword(email);
+        errorEl.className = 'auth-error auth-ok';
+        errorEl.textContent = t('resetEmailSent');
+      } catch (err) {
+        errorEl.className = 'auth-error';
+        errorEl.textContent = authErrorMessage(err.message);
+      }
+    });
+  }
 }
 
 function bindRegisterForm() {
   document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const firstname = document.getElementById('reg-firstname').value;
-    const email = document.getElementById('reg-email').value;
-    const alias = document.getElementById('reg-alias').value;
+    const errorEl = document.getElementById('auth-error');
+    errorEl.className = 'auth-error';
+    errorEl.textContent = '';
     const password = document.getElementById('reg-password').value;
     const confirm = document.getElementById('reg-confirm').value;
-    const errorEl = document.getElementById('auth-error');
-    errorEl.textContent = '';
-
     if (password !== confirm) {
       errorEl.textContent = authErrorMessage('PASSWORD_MISMATCH');
       return;
     }
     try {
-      const user = await registerUser({ firstname, email, alias, password });
-      completeLogin(user);
+      if (platformConfigured()) {
+        const firstname = document.getElementById('reg-firstname').value;
+        const email = document.getElementById('reg-email').value;
+        if (!firstname.trim()) throw new Error('MISSING_FIRSTNAME');
+        await platformSignUp({ email, password, displayName: firstname });
+        const u = await platformCurrentUser();
+        if (!u) {
+          // Confirmation d'e-mail requise : pas encore de session.
+          errorEl.className = 'auth-error auth-ok';
+          errorEl.textContent = t('confirmEmailSent');
+          return;
+        }
+        await completeLogin({ firstname: u.displayName, email: u.email, alias: u.displayName, id: u.id });
+      } else {
+        const firstname = document.getElementById('reg-firstname').value;
+        const email = document.getElementById('reg-email').value;
+        const alias = document.getElementById('reg-alias').value;
+        const user = await registerUser({ firstname, email, alias, password });
+        await completeLogin(user);
+      }
     } catch (err) {
       errorEl.textContent = authErrorMessage(err.message);
     }
@@ -556,6 +723,9 @@ window.addEventListener('hashchange', render);
 
 function render() {
   if (!currentUser) return renderAuthScreen(authMode);
+  // Paywall : en mode plateforme, sans abonnement actif, on n'affiche que
+  // l'écran d'abonnement (le contenu du cours reste inaccessible).
+  if (platformConfigured() && !subscriptionActive) return renderSubscribe();
   const route = parseRoute();
   renderRoute(route);
   updateSessionNav();
@@ -2486,7 +2656,7 @@ function initFeedbackBanner() {
   }
 }
 
-function init() {
+async function init() {
   initUiLanguage();
   initFeedbackBanner();
   document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -2503,19 +2673,30 @@ function init() {
     });
   }
 
-  const sessionAlias = getSessionAlias();
-  if (sessionAlias) {
-    const user = getUserByAlias(sessionAlias);
-    if (user) {
-      currentUser = { firstname: user.firstname, email: user.email, alias: user.alias };
-      progress = loadProgress();
-    } else {
-      clearSession(); // session périmée (utilisateur supprimé)
+  if (platformConfigured()) {
+    // Session serveur (Supabase persiste la session dans le navigateur).
+    try {
+      const u = await platformCurrentUser();
+      if (u) currentUser = { firstname: u.displayName, email: u.email, alias: u.displayName, id: u.id };
+    } catch (e) {}
+  } else {
+    const sessionAlias = getSessionAlias();
+    if (sessionAlias) {
+      const user = getUserByAlias(sessionAlias);
+      if (user) currentUser = { firstname: user.firstname, email: user.email, alias: user.alias };
+      else clearSession(); // session périmée (utilisateur supprimé)
     }
   }
 
+  if (currentUser) {
+    await hydrateProgress();
+    subscriptionActive = platformConfigured()
+      ? await platformHasAccess(PLATFORM_CONFIG.courseId)
+      : true;
+  }
+
   renderUserBar();
-  if (currentUser && !window.location.hash) navigate('/dashboard');
+  if (currentUser && subscriptionActive && !window.location.hash) navigate('/dashboard');
   render();
 }
 

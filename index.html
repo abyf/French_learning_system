@@ -62,6 +62,13 @@
     <p class="site-footer-text" data-i18n="footerCopyright">© 2026 Nipponmboa Consulting. Tous droits réservés.</p>
   </footer>
 
+  <!-- Plateforme (auth + paiement + progression synchronisée). Le SDK
+       Supabase est chargé depuis un CDN ; la couche plateforme ne
+       s'active que si config.js est renseigné. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="platform/config.js"></script>
+  <script src="platform/platform.js"></script>
+
   <script src="content.js"></script>
   <script src="illustrations.js"></script>
   <script src="daily-plan.js"></script>

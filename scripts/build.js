@@ -23,6 +23,8 @@ const FILES = [
   'app.js',
   'sw.js',
   'manifest.json',
+  'platform/config.js',
+  'platform/platform.js',
   'icons/icon-192.svg',
   'icons/icon-512.svg',
   'icons/nipponmboa-logo.svg',
